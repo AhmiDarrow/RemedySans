@@ -56,7 +56,7 @@ The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v
 
 U+00A0 no-break space uses the same empty glyph as the space, so a line will not break there. No emoji, and no scripts that need shaping (Arabic, Hebrew, Indic) or very large sets (CJK).
 
-The drawing grid is 24 units tall: baseline 0, x-height 14, cap height 20, ascender 21, descender -6. Regular is stroke weight 3.0 and Bold is 4.3, both with round caps and round joins. The font is proportional (digits share one width) at 1000 units per em. The line box is shared by both weights and is tall enough for the highest accent and the lowest comma below: ascent 1312, descent -416.
+The drawing grid is 24 units tall: baseline 0, x-height 14, cap height 20, ascender 21, descender -6. Regular is stroke weight 3.0 and Bold is 4.3, both with round caps and round joins. The font is proportional (digits share one width) at 1000 units per em. Line spacing is the same as in 1.000 and shared by both weights: ascent 1048, descent -340, no line gap, in both the hhea and the typo metrics, with USE_TYPO_METRICS set. Accents on capitals may rise above that ascent, as in most fonts. The Windows metrics (usWinAscent 1312, usWinDescent 416) cover every glyph, so nothing is clipped.
 
 Accented letters are not drawn one by one. Each accent is drawn once in the stroke file as a `mark`, each base letter says where marks sit with `anchor` lines, and a line such as `glyph U+00C1 = U+0041 + acute` builds Á. The build lifts a mark clear of the letter by one stroke weight plus a fixed gap, so the space between accent and letter looks the same in Regular and Bold. Greek and Cyrillic letters that look like Latin ones reuse the Latin drawing (`glyph U+0410 = U+0041`).
 
@@ -73,7 +73,7 @@ python check.py
 
 `build.py` expands every stroke to a filled outline, removes the overlaps, and writes the `.ttf` and `.woff2` files. Advance widths come from the stroke file and are the same in both weights. Changing a base letter or a mark changes every accented letter built from it.
 
-`check.py` also checks that every character on the list above is present in both weights, that every character except the spaces has an outline, that no accent touches its letter, and that nothing reaches outside the line box.
+`check.py` also checks that every character on the list above is present in both weights, that every character except the spaces has an outline, that no accent touches its letter, that the line spacing still equals 1.000's, and that the Windows metrics cover every glyph.
 
 ## About
 

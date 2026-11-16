@@ -82,6 +82,9 @@ HOLES = {
     "uni25FB": 2,
 }
 
+# The line spacing of 1.000, kept in every later version (font units).
+LINE_1000 = {"ascent": 1048, "descent": -340, "lineGap": 0}
+
 # Filled shapes: one solid contour, no hole.
 SOLID = ("bullet", "H18533", "triagup", "triagdn", "triagrt", "triaglf",
          "uni23F4", "uni23F5", "uni23F6", "uni23F7")
@@ -198,18 +201,34 @@ def check_font(font, style: str, src: build.Source) -> None:
         if zero_length_segments(font, name):
             fail(f"{style} {name} has a zero-length segment")
 
-    # Nothing may stick out of the line box: no clipping, and a mark never
-    # reaches into the line above or below.
+    # Line spacing stays as in 1.000: hhea and typo metrics are fixed, and
+    # USE_TYPO_METRICS tells renderers to use the typo values.
     hhea = font["hhea"]
     os2 = font["OS/2"]
+    line = {
+        "hhea.ascent": (hhea.ascent, LINE_1000["ascent"]),
+        "hhea.descent": (hhea.descent, LINE_1000["descent"]),
+        "hhea.lineGap": (hhea.lineGap, LINE_1000["lineGap"]),
+        "OS/2.sTypoAscender": (os2.sTypoAscender, LINE_1000["ascent"]),
+        "OS/2.sTypoDescender": (os2.sTypoDescender, LINE_1000["descent"]),
+        "OS/2.sTypoLineGap": (os2.sTypoLineGap, LINE_1000["lineGap"]),
+    }
+    for field, (got, want) in line.items():
+        if got != want:
+            fail(f"{style} {field} is {got}, expected the 1.000 value {want}")
+    if not os2.fsSelection & 0x80:
+        fail(f"{style} USE_TYPO_METRICS is not set")
+
+    # usWin metrics cover every glyph, so Windows never clips one (accents on
+    # capitals may rise above the hhea ascent, as in most fonts).
     for name in font.getGlyphOrder():
         glyph = glyf[name]
         if glyph.numberOfContours <= 0:
             continue
-        if glyph.yMax > hhea.ascent or glyph.yMax > os2.usWinAscent or glyph.yMax > os2.sTypoAscender:
-            fail(f"{style} {name} top {glyph.yMax} is above the ascent")
-        if glyph.yMin < hhea.descent or -glyph.yMin > os2.usWinDescent or glyph.yMin < os2.sTypoDescender:
-            fail(f"{style} {name} bottom {glyph.yMin} is below the descent")
+        if glyph.yMax > os2.usWinAscent:
+            fail(f"{style} {name} top {glyph.yMax} is above usWinAscent {os2.usWinAscent}")
+        if -glyph.yMin > os2.usWinDescent:
+            fail(f"{style} {name} bottom {glyph.yMin} is below usWinDescent {os2.usWinDescent}")
 
     name_ids = {
         rec.nameID: rec.toUnicode()

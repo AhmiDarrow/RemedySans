@@ -26,8 +26,8 @@ Source format:
 Fixes and checks:
 
 - A closed curve whose points all come out off-curve (small circles) was dropped by the build. This removed the counters of `%` in 1.000. They are back.
-- `check.py` now checks the full character list in both weights, that every character except the spaces has an outline, space widths, that no accent touches its letter, that no glyph reaches outside the line box, and the counters of the new round letters.
-- The line box grows to fit the accents on capitals and the comma below: ascent 1048 to 1312, descent -340 to -416 (both weights). Lines set in Remedy Sans are therefore taller than in 1.000.
+- `check.py` now checks the full character list in both weights, that every character except the spaces has an outline, space widths, that no accent touches its letter, the counters of the new round letters, that the hhea and typo metrics still equal 1.000's, and that the Windows metrics cover every glyph.
+- Line spacing is unchanged from 1.000: hhea and typo ascent 1048, descent -340, line gap 0, with USE_TYPO_METRICS set. Accents on capitals may rise above the ascent, as in most fonts. usWinAscent grows from 1048 to 1312 and usWinDescent from 340 to 416, so Windows never clips an accent or a comma below.
 - `specimen.html` and `specimen.png` show the new characters and sample text in several languages.
 
 ## 1.0.0 — 2026-11-15
