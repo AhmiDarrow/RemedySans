@@ -13,7 +13,10 @@ on the 24-unit grid. That grid is the em square (unitsPerEm 1000).
 """
 from __future__ import annotations
 
+import io
 import math
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -21,9 +24,12 @@ import pathops
 from fontTools.agl import UV2AGL
 from fontTools.fontBuilder import FontBuilder
 from fontTools.misc.roundTools import otRound
+from fontTools.pens.boundsPen import BoundsPen
 from fontTools.pens.cu2quPen import Cu2QuPen
+from fontTools.pens.reverseContourPen import ReverseContourPen
+from fontTools.pens.t2CharStringPen import T2CharStringPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
-from fontTools.ttLib import newTable
+from fontTools.ttLib import TTFont, newTable
 from fontTools.ttLib.tables.O_S_2f_2 import Panose
 from fontTools.ttLib.tables.ttProgram import Program
 
@@ -32,7 +38,8 @@ SOURCE = ROOT / "source" / "remedy-sans.strokes"
 OUT = ROOT / "fonts"
 
 FAMILY = "Remedy Sans"
-VERSION = "1.100"
+FILE_STEM = "RemedySans"
+VERSION = "1.110"
 COPYRIGHT = "Copyright 2026 Ahmi Darrow"
 DESIGNER = "Ahmi Darrow"
 VENDOR_URL = "https://github.com/AhmiDarrow/RemedySans"
@@ -793,14 +800,108 @@ def apply_family_metrics(fonts: dict[str, object], bounds: dict[str, tuple[int, 
         os2.usWinDescent = win_desc
 
 
+def _ink(font, ch: str):
+    """(yMin, yMax) of a character's outline."""
+    glyphs = font.getGlyphSet()
+    pen = BoundsPen(glyphs)
+    glyphs[font.getBestCmap()[ord(ch)]].draw(pen)
+    return otRound(pen.bounds[1]), otRound(pen.bounds[3])
+
+
+def _zones(pairs):
+    """Sorted, non-overlapping alignment zones as a flat list."""
+    merged = []
+    for lo, hi in sorted((min(a, b), max(a, b)) for a, b in pairs):
+        if merged and lo <= merged[-1][1] + 3:
+            merged[-1][1] = max(merged[-1][1], hi)
+        else:
+            merged.append([lo, hi])
+    return [v for z in merged for v in z]
+
+
+def _otf_from(font, weight: float):
+    """A CFF (.otf) copy of a built TrueType font: same glyphs, metrics, names and cmap.
+    Alignment zones and stems come from the font's own ink, for otfautohint."""
+    buf = io.BytesIO()
+    font.save(buf)
+    buf.seek(0)
+    f = TTFont(buf)
+    glyphs = f.getGlyphSet()
+    widths = f["hmtx"].metrics
+    charstrings = {}
+    for name in f.getGlyphOrder():
+        pen = T2CharStringPen(widths[name][0], glyphs)
+        glyphs[name].draw(ReverseContourPen(pen))
+        charstrings[name] = pen.getCharString()
+    base = [_ink(f, "x")[0], _ink(f, "o")[0]]
+    xh = [_ink(f, "x")[1], _ink(f, "o")[1]]
+    cap = [_ink(f, "H")[1], _ink(f, "O")[1]]
+    asc = [_ink(f, "d")[1], _ink(f, "d")[1]]
+    desc = [_ink(f, "p")[0], _ink(f, "p")[0]]
+    blues = _zones([base, xh, cap, asc])
+    stem = otRound(weight * SCALE)
+    for tag in ("glyf", "loca", "gasp", "prep", "fpgm", "cvt "):
+        if tag in f:
+            del f[tag]
+    f.sfntVersion = "OTTO"
+    fb = FontBuilder(font=f)
+    names = f["name"]
+    fb.setupCFF(
+        names.getDebugName(6),
+        {
+            "FullName": names.getDebugName(4),
+            "FamilyName": names.getDebugName(1),
+            "Weight": names.getDebugName(2),
+            "version": VERSION,
+            "Notice": COPYRIGHT,
+        },
+        charstrings,
+        {"BlueValues": blues, "OtherBlues": _zones([desc]), "StdHW": stem, "StdVW": stem},
+    )
+    fb.setupMaxp()
+    f["post"].formatType = 3.0
+    return f
+
+
+def _ttfautohint(font) -> bytes:
+    """The TrueType font hinted by ttfautohint, stems snapped to whole pixels."""
+    import ttfautohint
+    from ttfautohint.options import StemWidthMode
+
+    buf = io.BytesIO()
+    for tag in ("gasp", "prep", "fpgm", "cvt "):
+        if tag in font:
+            del font[tag]
+    font.flavor = None
+    font.save(buf)
+    return ttfautohint.ttfautohint(
+        in_buffer=buf.getvalue(),
+        no_info=True,
+        gray_stem_width_mode=StemWidthMode.STRONG,
+        gdi_cleartype_stem_width_mode=StemWidthMode.STRONG,
+        dw_cleartype_stem_width_mode=StemWidthMode.STRONG,
+    )
+
+
 def save_font(font, style: str) -> Path:
+    """Write the hinted .ttf and .woff2, and the hinted .otf."""
     OUT.mkdir(exist_ok=True)
-    ttf = OUT / f"RemedySans-{style}.ttf"
-    font.flavor = None
-    font.save(ttf)
-    font.flavor = "woff2"
-    font.save(ttf.with_suffix(".woff2"))
-    font.flavor = None
+    stem = OUT / f"{FILE_STEM}-{style}"
+    weight = WEIGHTS["bold" if style == "Bold" else "regular"]
+
+    otf = stem.with_suffix(".otf")
+    _otf_from(font, weight).save(otf)
+    hinter = shutil.which("otfautohint")
+    if hinter is None:
+        raise SystemExit("otfautohint not found: pip install afdko")
+    subprocess.run([hinter, str(otf)], check=True, capture_output=True)
+
+    hinted = _ttfautohint(font)
+    ttf = stem.with_suffix(".ttf")
+    ttf.write_bytes(hinted)
+    web = TTFont(io.BytesIO(hinted))
+    web.flavor = "woff2"
+    web.save(stem.with_suffix(".woff2"))
     return ttf
 
 
@@ -817,7 +918,7 @@ def main() -> int:
         style = "Bold" if weight_name == "bold" else "Regular"
         path = save_font(font, style)
         print(
-            f"built {path.relative_to(ROOT)} and .woff2 "
+            f"built {path.relative_to(ROOT)}, .woff2 and .otf "
             f"({len(src.glyphs)} characters, weight {WEIGHTS[weight_name]})"
         )
     return 0
