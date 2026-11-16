@@ -3,7 +3,7 @@
 Remedy Sans is the typeface of RemedyOS.
 A geometric sans in Regular and Bold, drawn as strokes with round terminals.
 
-Version 1.100. The last published release is [v1.0.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0) (font version 1.000, Basic Latin only).
+Version 1.110. The last published release is [v1.0.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0) (font version 1.000, Basic Latin only).
 
 ![Remedy Sans specimen](specimen.png)
 
@@ -11,7 +11,7 @@ Version 1.100. The last published release is [v1.0.0](https://github.com/AhmiDar
 
 | Path | What it is |
 |---|---|
-| `fonts/` | Ready-to-use files: `RemedySans-Regular` and `RemedySans-Bold`, each as `.ttf` and `.woff2` |
+| `fonts/` | Ready-to-use files: `RemedySans-Regular` and `RemedySans-Bold`, each as `.ttf`, `.otf` and `.woff2`. The `.ttf` and `.woff2` are hinted with ttfautohint (stems snap to whole pixels); the `.otf` carries PostScript hints from otfautohint |
 | `source/remedy-sans.strokes` | The source. Every character drawn as strokes on a 24-unit grid |
 | `build.py` | Turns the stroke file into the font files |
 | `check.py` | Checks advances, holes, and that both weights share one set of metrics |
@@ -37,7 +37,7 @@ h1 { font: 700 64px/1.15 "Remedy Sans", sans-serif; }
 
 ## Using it on the desktop
 
-Install `RemedySans-Regular.ttf` and `RemedySans-Bold.ttf`. On Windows, select both files, right-click, and choose Install. On macOS, open them in Font Book and choose Install. The family name is Remedy Sans. Bold is the bold style of that family.
+Install `RemedySans-Regular.ttf` and `RemedySans-Bold.ttf` (or the two `.otf` files; install one format, not both). On Windows, select both files, right-click, and choose Install. On macOS, open them in Font Book and choose Install. The family name is Remedy Sans. Bold is the bold style of that family.
 
 The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0) has those files, the web fonts, this readme, and the specimen.
 
@@ -66,12 +66,12 @@ Accented letters are not drawn one by one. Each accent is drawn once in the stro
 2. Rebuild:
 
 ```bash
-pip install fonttools brotli skia-pathops
+pip install fonttools brotli skia-pathops ttfautohint-py afdko
 python build.py
 python check.py
 ```
 
-`build.py` expands every stroke to a filled outline, removes the overlaps, and writes the `.ttf` and `.woff2` files. Advance widths come from the stroke file and are the same in both weights. Changing a base letter or a mark changes every accented letter built from it.
+`build.py` expands every stroke to a filled outline, removes the overlaps, hints them, and writes the `.ttf`, `.woff2` and `.otf` files. Advance widths come from the stroke file and are the same in both weights. Changing a base letter or a mark changes every accented letter built from it.
 
 `check.py` also checks that every character on the list above is present in both weights, that every character except the spaces has an outline, that no accent touches its letter, that the line spacing still equals 1.000's, and that the Windows metrics cover every glyph.
 
