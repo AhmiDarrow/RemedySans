@@ -3,7 +3,7 @@
 Remedy Sans is the typeface of RemedyOS.
 A geometric sans in Regular and Bold, drawn as strokes with round terminals.
 
-Version 1.110. The last published release is [v1.0.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0) (font version 1.000, Basic Latin only).
+Version 1.110. The latest release is [v1.1.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) (font version 1.110).
 
 ![Remedy Sans specimen](specimen.png)
 
@@ -39,7 +39,7 @@ h1 { font: 700 64px/1.15 "Remedy Sans", sans-serif; }
 
 Install `RemedySans-Regular.ttf` and `RemedySans-Bold.ttf` (or the two `.otf` files; install one format, not both). On Windows, select both files, right-click, and choose Install. On macOS, open them in Font Book and choose Install. The family name is Remedy Sans. Bold is the bold style of that family.
 
-The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0) has those files, the web fonts, this readme, and the specimen.
+The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) has the `.ttf` and `.otf` files, the web fonts, this readme, the changelog, and the specimen.
 
 ## Characters
 

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.110 — 2026-11-16
+## 1.110 — 2026-11-16 (release v1.1.0)
 
 Sharper on screen, an OpenType/CFF version, and cleaner joins. The font's own version string is 1.110. Advances, metrics and coverage are unchanged.
 
