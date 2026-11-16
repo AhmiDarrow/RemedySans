@@ -32,7 +32,7 @@ SOURCE = ROOT / "source" / "remedy-sans.strokes"
 OUT = ROOT / "fonts"
 
 FAMILY = "Remedy Sans"
-VERSION = "1.000"
+VERSION = "1.100"
 COPYRIGHT = "Copyright 2026 Ahmi Darrow"
 DESIGNER = "Ahmi Darrow"
 VENDOR_URL = "https://github.com/AhmiDarrow/RemedySans"
@@ -73,47 +73,274 @@ def fu(v: float) -> int:
     return -int(math.floor(-scaled + 0.5))
 
 
-def parse(path: Path = SOURCE) -> list[tuple[int, float, list]]:
-    """Return [(codepoint, advance, commands)] in file order."""
-    glyphs: list[tuple[int, float, list]] = []
-    current: list | None = None
+# Space between a mark and the stroke it sits on, in grid units. The stroke's
+# own weight is added on top, so the white gap is the same in both weights.
+MARK_GAP = 1.0
+MARK_KINDS = ("above", "below", "attach")
+
+
+def code(token: str, n: int) -> int:
+    """A character code: decimal (65) or U+0041."""
+    try:
+        if token.upper().startswith("U+"):
+            return int(token[2:], 16)
+        return int(token)
+    except ValueError:
+        raise ValueError(f"line {n}: bad character code {token!r}") from None
+
+
+def _point(token: str, n: int) -> tuple[float, float]:
+    parts = token.split(",")
+    if len(parts) != 2:
+        raise ValueError(f"line {n}: expected x,y, got {token!r}")
+    return float(parts[0]), float(parts[1])
+
+
+class Glyph:
+    """One character of the stroke file, before marks are placed."""
+
+    def __init__(self, cp: int, advance: float | None, line: int):
+        self.cp = cp
+        self.advance = advance
+        self.line = line
+        self.items: list = []           # drawing commands, ("use", ...), ("put", ...)
+        self.anchors: dict[str, tuple[float, float]] = {}
+
+
+class Mark:
+    """An accent drawn once and placed on many letters."""
+
+    def __init__(self, name: str, anchor: str, kind: str, line: int):
+        self.name = name
+        self.anchor = anchor
+        self.kind = kind
+        self.line = line
+        self.items: list = []
+
+
+class Source:
+    """The parsed stroke file: glyphs in file order and the marks they use."""
+
+    def __init__(self, glyphs: list[Glyph], marks: dict[str, Mark]):
+        self.glyphs = glyphs
+        self.by_cp = {g.cp: g for g in glyphs}
+        self.marks = marks
+        for g in glyphs:
+            self.advance(g.cp)          # resolve now so errors show at load
+            self.anchors(g.cp)
+
+    def advance(self, cp: int, _seen=()) -> float:
+        g = self._get(cp, _seen)
+        if g.advance is not None:
+            return g.advance
+        for item in g.items:
+            if item[0] == "use":
+                return self.advance(item[1], _seen + (cp,))
+        raise ValueError(f"line {g.line}: U+{cp:04X} has no adv= and uses no other glyph")
+
+    def anchors(self, cp: int, _seen=()) -> dict[str, tuple[float, float]]:
+        g = self._get(cp, _seen)
+        out: dict[str, tuple[float, float]] = {}
+        for item in g.items:
+            if item[0] == "use":
+                _, other, dx, dy = item
+                for name, (x, y) in self.anchors(other, _seen + (cp,)).items():
+                    out.setdefault(name, (x + dx, y + dy))
+        out.update(g.anchors)
+        return out
+
+    def _get(self, cp: int, seen) -> Glyph:
+        if cp in seen:
+            raise ValueError(f"U+{cp:04X} uses itself")
+        if cp not in self.by_cp:
+            raise ValueError(f"U+{cp:04X} is used but never drawn")
+        return self.by_cp[cp]
+
+    def commands(self, cp: int, weight: float, _seen=()) -> list:
+        """Flat drawing commands for one weight, with every mark in place."""
+        g = self._get(cp, _seen)
+        out: list = []
+        for item in g.items:
+            if item[0] == "use":
+                _, other, dx, dy = item
+                out += [shift(c, dx, dy) for c in self.commands(other, weight, _seen + (cp,))]
+            elif item[0] == "put":
+                _, name, x, y, touch = item
+                out += self.place(name, x, y, weight, touch)
+            else:
+                out.append(item)
+        return out
+
+    def place(self, name: str, x: float, y: float, weight: float, touch: bool = False) -> list:
+        mark = self.marks.get(name)
+        if mark is None:
+            raise ValueError(f"mark {name!r} is used but never drawn")
+        dy = 0.0
+        if not touch and mark.kind == "above":
+            dy = weight + MARK_GAP
+        elif not touch and mark.kind == "below":
+            dy = -(weight + MARK_GAP)
+        return [shift(c, x, y + dy) for c in mark.items]
+
+    def mark_parts(self, cp: int, weight: float) -> tuple[list, list]:
+        """(base commands, mark commands) of a composite, for collision checks."""
+        g = self.by_cp[cp]
+        base: list = []
+        marks: list = []
+        for item in g.items:
+            if item[0] == "put" and not item[4] and self.marks[item[1]].kind != "attach":
+                marks += self.place(item[1], item[2], item[3], weight)
+            elif item[0] == "use":
+                base += [shift(c, item[2], item[3]) for c in self.commands(item[1], weight)]
+            elif item[0] == "put":
+                base += self.place(item[1], item[2], item[3], weight, item[4])
+            else:
+                base.append(item)
+        return base, marks
+
+    def is_composite(self, cp: int) -> bool:
+        g = self.by_cp[cp]
+        return any(i[0] == "put" and not i[4] and self.marks[i[1]].kind != "attach" for i in g.items)
+
+
+def shift(cmd, dx: float, dy: float):
+    kind = cmd[0]
+    if kind == "L":
+        return ("L", cmd[1] + dx, cmd[2] + dy, cmd[3] + dx, cmd[4] + dy)
+    if kind == "A":
+        return ("A", cmd[1] + dx, cmd[2] + dy, *cmd[3:])
+    if kind == "Q":
+        return ("Q", cmd[1] + dx, cmd[2] + dy, cmd[3] + dx, cmd[4] + dy, cmd[5] + dx, cmd[6] + dy)
+    if kind == "D":
+        return ("D", cmd[1] + dx, cmd[2] + dy)
+    if kind == "F":
+        return ("F", *[(x + dx, y + dy) for x, y in cmd[1:]])
+    raise ValueError(f"unknown command {kind}")
+
+
+def _drawing(kind: str, rest: str, n: int, raw: str):
+    if kind == "F":
+        pts = [_point(t, n) for t in rest.split()]
+        if len(pts) < 3:
+            raise ValueError(f"line {n}: F needs at least three points: {raw!r}")
+        return ("F", *pts)
+    nums = [float(t) for t in rest.replace(",", " ").split()]
+    if kind == "L" and len(nums) == 4:
+        return ("L", *nums)
+    if kind == "A" and len(nums) == 6:
+        return ("A", *nums)
+    if kind == "Q" and len(nums) == 6:
+        return ("Q", *nums)
+    if kind == "D" and len(nums) == 2:
+        return ("D", *nums)
+    raise ValueError(f"line {n}: bad command {raw!r}")
+
+
+def load(path: Path = SOURCE) -> Source:
+    """Parse the stroke file. See its header for the commands."""
+    glyphs: list[Glyph] = []
+    marks: dict[str, Mark] = {}
+    current = None
     seen: set[int] = set()
+    composites: list[tuple[Glyph, int, list[str], int]] = []
 
     for n, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         line = raw.split("#", 1)[0].strip()
         if not line:
             continue
-        if line.startswith("glyph"):
-            parts = line.split()
-            if len(parts) != 3 or not parts[2].startswith("adv="):
+        word, _, rest = line.partition(" ")
+        rest = rest.strip()
+        if word == "glyph":
+            # glyph <code> [adv=<units>] [= <base> + <mark> + ...]
+            tokens = rest.split()
+            if not tokens:
                 raise ValueError(f"line {n}: expected 'glyph <code> adv=<units>', got {raw!r}")
-            cp = int(parts[1])
+            cp = code(tokens.pop(0), n)
+            advance = None
+            if tokens and tokens[0].startswith("adv="):
+                advance = float(tokens.pop(0)[4:])
+            recipe: list[str] = []
+            if tokens:
+                if tokens[0] != "=" or len(tokens) < 2 or tokens[2::2] != ["+"] * len(tokens[2::2]):
+                    raise ValueError(f"line {n}: expected 'glyph <code> = <base> + <mark>', got {raw!r}")
+                recipe = tokens[1::2]
+            elif advance is None:
+                raise ValueError(f"line {n}: glyph needs adv= or '= <base>': {raw!r}")
             if cp in seen:
                 raise ValueError(f"line {n}: U+{cp:04X} defined twice")
             seen.add(cp)
-            current = []
-            glyphs.append((cp, float(parts[2][4:]), current))
+            current = Glyph(cp, advance, n)
+            glyphs.append(current)
+            if recipe:
+                composites.append((current, code(recipe[0], n), recipe[1:], n))
+            continue
+        if word == "mark":
+            parts = rest.split()
+            if len(parts) != 3 or parts[2] not in MARK_KINDS:
+                raise ValueError(f"line {n}: expected 'mark <name> <anchor> above|below|attach'")
+            if parts[0] in marks:
+                raise ValueError(f"line {n}: mark {parts[0]} defined twice")
+            current = Mark(parts[0], parts[1], parts[2], n)
+            marks[current.name] = current
             continue
         if current is None:
             raise ValueError(f"line {n}: command before any glyph")
-        kind = line[0]
-        nums = [float(t) for t in line[1:].replace(",", " ").split()]
-        if kind == "L" and len(nums) == 4:
-            current.append(("L", *nums))
-        elif kind == "A" and len(nums) == 6:
-            current.append(("A", *nums))
-        elif kind == "Q" and len(nums) == 6:
-            current.append(("Q", *nums))
-        elif kind == "D" and len(nums) == 2:
-            current.append(("D", *nums))
+        if word == "anchor":
+            parts = rest.split()
+            if not isinstance(current, Glyph) or len(parts) != 2:
+                raise ValueError(f"line {n}: expected 'anchor <name> x,y' inside a glyph")
+            current.anchors[parts[0]] = _point(parts[1], n)
+        elif word == "use":
+            parts = rest.split()
+            if not isinstance(current, Glyph) or len(parts) not in (1, 2):
+                raise ValueError(f"line {n}: expected 'use <code> [dx,dy]' inside a glyph")
+            dx, dy = _point(parts[1], n) if len(parts) == 2 else (0.0, 0.0)
+            current.items.append(("use", code(parts[0], n), dx, dy))
+        elif word == "put":
+            parts = rest.split()
+            touch = parts[-1] == "touch"
+            if touch:
+                parts = parts[:-1]
+            if not isinstance(current, Glyph) or len(parts) != 2:
+                raise ValueError(f"line {n}: expected 'put <mark> x,y [touch]' inside a glyph")
+            x, y = _point(parts[1], n)
+            current.items.append(("put", parts[0], x, y, touch))
+        elif word in ("L", "A", "Q", "D", "F"):
+            current.items.append(_drawing(word, rest, n, raw))
         else:
             raise ValueError(f"line {n}: bad command {raw!r}")
 
-    expected = list(range(32, 127))
-    got = [cp for cp, _, _ in glyphs]
-    if got != expected:
-        raise ValueError(f"expected U+0020..U+007E in order, got {got[:8]}... ({len(got)} glyphs)")
-    return glyphs
+    # 'glyph X = base + mark': the base's strokes, then each mark on its anchor.
+    by_cp = {g.cp: g for g in glyphs}
+    tmp = Source.__new__(Source)
+    tmp.glyphs, tmp.by_cp, tmp.marks = glyphs, by_cp, marks
+    # Two passes: every composite first becomes a copy of its base, so a mark
+    # can find the anchors of a base that is itself a copy (Cyrillic Е = E).
+    for g, base, names, n in composites:
+        if base not in by_cp:
+            raise ValueError(f"line {n}: base U+{base:04X} is never drawn")
+        g.items.insert(0, ("use", base, 0.0, 0.0))
+    for g, base, names, n in composites:
+        prefix = []
+        anchors = tmp.anchors(base)
+        for name in names:
+            mark = marks.get(name)
+            if mark is None:
+                raise ValueError(f"line {n}: unknown mark {name!r}")
+            if mark.anchor not in anchors:
+                raise ValueError(f"line {n}: U+{base:04X} has no '{mark.anchor}' anchor for {name}")
+            x, y = anchors[mark.anchor]
+            prefix.append(("put", name, x, y, False))
+        g.items[1:1] = prefix
+
+    return Source(glyphs, marks)
+
+
+def parse(path: Path = SOURCE) -> list[tuple[int, float, list]]:
+    """[(codepoint, advance, commands at Regular weight)] in file order."""
+    src = load(path)
+    w = WEIGHTS["regular"]
+    return [(g.cp, src.advance(g.cp), src.commands(g.cp, w)) for g in src.glyphs]
 
 
 def _arc_cubic(cx, cy, rx, ry, a0_deg, a1_deg):
@@ -188,6 +415,18 @@ def _add_commands(center, dots, commands, weight: float) -> tuple[bool, bool]:
             _, x, y = cmd
             _add_arc(dots, x, y, radius, radius, 0, 360)
             has_dots = True
+        elif kind == "F":
+            # Filled polygon: the inside is solid, and the edges are stroked
+            # like any other line so the corners stay round.
+            pts = cmd[1:]
+            dots.moveTo(pts[0][0] * SCALE, pts[0][1] * SCALE)
+            for x, y in pts[1:]:
+                dots.lineTo(x * SCALE, y * SCALE)
+            dots.close()
+            for (x0, y0), (x1, y1) in zip(pts, pts[1:] + pts[:1]):
+                center.moveTo(x0 * SCALE, y0 * SCALE)
+                center.lineTo(x1 * SCALE, y1 * SCALE)
+            has_center = has_dots = True
         else:
             raise ValueError(f"unknown command {kind}")
     return has_center, has_dots
@@ -325,9 +564,13 @@ def _dedupe_contour(points, flags):
             kept_f[0] = kept_f[-1]
         kept_p.pop()
         kept_f.pop()
-    start = next((i for i, flag in enumerate(kept_f) if flag & 1), None)
-    if start is None or len(kept_p) < 3:
+    if len(kept_p) < 3:
         return [], []
+    start = next((i for i, flag in enumerate(kept_f) if flag & 1), None)
+    if start is None:
+        # Every point is off-curve: a valid closed quadratic spline (small
+        # circles come out of Cu2Qu this way). Keep it as it is.
+        return kept_p, kept_f
     if start:
         kept_p = kept_p[start:] + kept_p[:start]
         kept_f = kept_f[start:] + kept_f[:start]
@@ -335,6 +578,10 @@ def _dedupe_contour(points, flags):
 
 
 def _draw_contour(pen, points, flags) -> None:
+    if not any(flag & 1 for flag in flags):
+        pen.qCurveTo(*points, None)
+        pen.closePath()
+        return
     pen.moveTo(points[0])
     index = 1
     count = len(points)
@@ -387,7 +634,11 @@ def glyph_from_path(path) -> tuple[object, int]:
     return glyph, int(glyph.xMin)
 
 
-def build_weight(weight_name: str, glyphs) -> tuple[object, int, int]:
+def glyph_name(cp: int) -> str:
+    return UV2AGL.get(cp, f"uni{cp:04X}")
+
+
+def build_weight(weight_name: str, src: Source) -> tuple[object, int, int]:
     """Return (TTFont, yMin, yMax) for one weight. Vertical metrics are filled later."""
     weight = WEIGHTS[weight_name]
     is_bold = weight_name == "bold"
@@ -411,15 +662,15 @@ def build_weight(weight_name: str, glyphs) -> tuple[object, int, int]:
         metrics[name] = (fu(advance), lsb)
 
     add(".notdef", NOTDEF, NOTDEF_ADV)
-    for cp, advance, commands in glyphs:
-        name = UV2AGL.get(cp, f"uni{cp:04X}")
+    for g in src.glyphs:
+        name = glyph_name(g.cp)
         if name in glyf:
             raise ValueError(f"duplicate glyph name {name}")
         order.append(name)
-        cmap[cp] = name
-        add(name, commands, advance)
-    # U+00A0 shares the space glyph. The strokes file has no separate drawing for it.
-    cmap[0x00A0] = cmap[0x0020]
+        cmap[g.cp] = name
+        add(name, src.commands(g.cp, weight), src.advance(g.cp))
+    # U+00A0 shares the space glyph unless the strokes file draws it.
+    cmap.setdefault(0x00A0, cmap[0x0020])
 
     ink = [g for g in glyf.values() if g.numberOfContours]
     y_min = min(int(g.yMin) for g in ink)
@@ -495,7 +746,7 @@ def build_weight(weight_name: str, glyphs) -> tuple[object, int, int]:
         isFixedPitch=0,
     )
     fb.font["head"].macStyle = 1 if is_bold else 0
-    fb.font["head"].fontRevision = 1.0
+    fb.font["head"].fontRevision = float(VERSION)
 
     # Windows names only. Platform 1 (Mac) records are obsolete.
     fb.font["name"].names = [rec for rec in fb.font["name"].names if rec.platformID != 1]
@@ -547,11 +798,11 @@ def save_font(font, style: str) -> Path:
 
 
 def main() -> int:
-    glyphs = parse()
+    src = load()
     fonts = {}
     bounds = {}
     for weight_name in ("regular", "bold"):
-        font, y_min, y_max = build_weight(weight_name, glyphs)
+        font, y_min, y_max = build_weight(weight_name, src)
         fonts[weight_name] = font
         bounds[weight_name] = (y_min, y_max)
     apply_family_metrics(fonts, bounds)
@@ -560,7 +811,7 @@ def main() -> int:
         path = save_font(font, style)
         print(
             f"built {path.relative_to(ROOT)} and .woff2 "
-            f"({len(glyphs)} characters, weight {WEIGHTS[weight_name]})"
+            f"({len(src.glyphs)} characters, weight {WEIGHTS[weight_name]})"
         )
     return 0
 

@@ -3,7 +3,7 @@
 Remedy Sans is the typeface of RemedyOS.
 A geometric sans in Regular and Bold, drawn as strokes with round terminals.
 
-Version 1.000. The public release is [v1.0.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0).
+Version 1.100. The last published release is [v1.0.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.0.0) (font version 1.000, Basic Latin only).
 
 ![Remedy Sans specimen](specimen.png)
 
@@ -43,9 +43,22 @@ The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v
 
 ## Characters
 
-Basic Latin, U+0020 through U+007E: the English uppercase and lowercase alphabets, digits, and the standard keyboard punctuation. 95 characters, each drawn in the stroke file. U+00A0 no-break space uses the same empty glyph as the space, so a line will not break there. No accented letters.
+584 characters in each weight, the same set in Regular and Bold:
 
-The drawing grid is 24 units tall: baseline 0, x-height 14, cap height 20, ascender 21, descender -6. Regular is stroke weight 3.0 and Bold is 4.3, both with round caps and round joins.
+- Basic Latin, Latin-1 Supplement and Latin Extended-A in full (Western, Central European, Baltic, Turkish, Maltese, Welsh, Esperanto), plus Romanian Ș ș Ț ț, ƒ, and dotless ȷ
+- The accents on their own: ˆ ˇ ˘ ˙ ˚ ˛ ˜ ˝ ´ ¨ ¯ ¸
+- Modern monotonic Greek, with tonos and dialytika
+- Cyrillic U+0400 to U+045F (Russian, Ukrainian, Belarusian, Bulgarian, Serbian, Macedonian) and Ґ ґ Ғ ғ Қ қ Ң ң Ү ү Ұ ұ Һ һ Ә ә Ө ө (Kazakh and Central Asian)
+- General punctuation: dashes, curly quotes, daggers, bullet, ellipsis, per mille, primes, single guillemets, ‼, fraction slash
+- Spaces with their proper widths: no-break, figure, punctuation, thin, hair, narrow no-break
+- Currency € ₹ ₽ ₺ ₩ ₪ ₫ ₱ ₴ ₸ ₿, letterlike ™ №, arrows ← ↑ → ↓ ↔ ↕ ⇧, maths − ∞ √ ≈ ≠ ≤ ≥
+- Shapes a UI draws: ◻ ▲ ▼ ► ◄ ⏴ ⏵ ⏶ ⏷ ✓ ✗ ● ○
+
+U+00A0 no-break space uses the same empty glyph as the space, so a line will not break there. No emoji, and no scripts that need shaping (Arabic, Hebrew, Indic) or very large sets (CJK).
+
+The drawing grid is 24 units tall: baseline 0, x-height 14, cap height 20, ascender 21, descender -6. Regular is stroke weight 3.0 and Bold is 4.3, both with round caps and round joins. The font is proportional (digits share one width) at 1000 units per em. The line box is shared by both weights and is tall enough for the highest accent and the lowest comma below: ascent 1312, descent -416.
+
+Accented letters are not drawn one by one. Each accent is drawn once in the stroke file as a `mark`, each base letter says where marks sit with `anchor` lines, and a line such as `glyph U+00C1 = U+0041 + acute` builds Á. The build lifts a mark clear of the letter by one stroke weight plus a fixed gap, so the space between accent and letter looks the same in Regular and Bold. Greek and Cyrillic letters that look like Latin ones reuse the Latin drawing (`glyph U+0410 = U+0041`).
 
 ## Changing a letter
 
@@ -58,7 +71,9 @@ python build.py
 python check.py
 ```
 
-`build.py` expands every stroke to a filled outline, removes the overlaps, and writes the `.ttf` and `.woff2` files. Advance widths come from the stroke file and are the same in both weights.
+`build.py` expands every stroke to a filled outline, removes the overlaps, and writes the `.ttf` and `.woff2` files. Advance widths come from the stroke file and are the same in both weights. Changing a base letter or a mark changes every accented letter built from it.
+
+`check.py` also checks that every character on the list above is present in both weights, that every character except the spaces has an outline, that no accent touches its letter, and that nothing reaches outside the line box.
 
 ## About
 

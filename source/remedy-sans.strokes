@@ -1,10 +1,30 @@
 # Remedy Sans: the RemedyOS typeface, drawn as strokes on a 24-unit grid (baseline 0, x-height 14, cap height 20, ascender 21, descender -6).
-# glyph <char-code> adv=<units>
-#   L x0,y0 x1,y1            line
-#   A cx,cy rx,ry a0 a1      elliptical arc, degrees counter-clockwise from +x
-#   Q x0,y0 cx,cy x1,y1      quadratic curve
-#   D x,y                    dot (a round terminal)
+# Character codes are decimal (65) or U+0041.
+#
+# glyph <code> adv=<units>     a character drawn here; the drawing commands follow
+#   L x0,y0 x1,y1              line
+#   A cx,cy rx,ry a0 a1        elliptical arc, degrees counter-clockwise from +x
+#   Q x0,y0 cx,cy x1,y1        quadratic curve
+#   D x,y                      dot (a round terminal)
+#   F x,y x,y x,y ...          filled polygon; its edges are stroked too, so corners stay round
+#   use <code> [dx,dy]         draw another character's strokes here, moved by dx,dy
+#   put <mark> x,y [touch]     draw a mark at x,y, lifted clear of the stroke (touch: no gap)
+#   anchor <name> x,y          where marks sit on this letter: top, bottom, ogonek, caron
+# glyph <code> = <base> + <mark> [+ <mark>]
+#                              the base character with each mark on the base's anchor;
+#                              the advance is the base's unless adv= is given before '='
+# glyph <code> = <base>        the same drawing as another character
+#
+# mark <name> <anchor> above|below|attach
+#   An accent, drawn once with (0,0) at the anchor point. 'above' marks are drawn upward
+#   from y=0 and 'below' marks downward from y=0; the build moves them away from the
+#   anchor by one stroke weight plus a fixed gap, so the white space between mark and
+#   letter is the same in Regular and Bold. 'attach' marks are drawn touching the anchor.
+#
+# Anchors and marks sit on stroke centrelines, like every other coordinate here.
 # Stroke weight comes from the renderer (regular 3.0, bold 4.3); every terminal is round.
+
+# ---- Basic Latin ----
 
 glyph 32 adv=7
 glyph 33 adv=7
@@ -110,6 +130,8 @@ A 11,9 9.5,9.5 -40 240
 L 16,14 16,6
 Q 16,6 16,4 19.5,4
 glyph 65 adv=18
+anchor top 9,20
+anchor ogonek 16,0
 L 2,0 9,20
 L 9,20 16,0
 L 4.5,7 13.5,7
@@ -121,13 +143,18 @@ L 3,11 10,11
 A 10,5.5 5.5,5.5 -90 90
 L 3,0 10,0
 glyph 67 adv=18
+anchor top 10,20
+anchor bottom 10,0
 A 9.5,10 7,10 40 320
 glyph 68 adv=18
+anchor top 8.5,20
 L 3,20 3,0
 L 3,20 8,20
 A 8,10 7.5,10 -90 90
 L 3,0 8,0
 glyph 69 adv=15
+anchor top 8,20
+anchor ogonek 11,0
 L 3,20 3,0
 L 3,20 13,20
 L 3,10.5 11.5,10.5
@@ -137,23 +164,34 @@ L 3,20 3,0
 L 3,20 13,20
 L 3,10.5 11,10.5
 glyph 71 adv=19
+anchor top 10,20
+anchor bottom 10,0
 A 9.5,10 7,10 40 320
 L 16.5,9 16.5,2
 L 16.5,9 11,9
 glyph 72 adv=18
+anchor top 9,20
 L 3,20 3,0
 L 15,20 15,0
 L 3,10 15,10
 glyph 73 adv=7
+anchor top 3.5,20
+anchor ogonek 3.5,0
 L 3.5,20 3.5,0
 glyph 74 adv=13
+anchor top 10,20
 L 10,20 10,5
 A 5.5,5 4.5,5 180 360
 glyph 75 adv=17
+anchor top 8.5,20
+anchor bottom 8.5,0
 L 3,20 3,0
 L 14.5,20 3,8.5
 L 7.5,12 15,0
 glyph 76 adv=14
+anchor top 3.5,20
+anchor bottom 7,0
+anchor caron 8,20
 L 3,20 3,0
 L 3,0 12.5,0
 glyph 77 adv=22
@@ -162,10 +200,13 @@ L 3,20 11,5
 L 11,5 19,20
 L 19,20 19,0
 glyph 78 adv=18
+anchor top 9,20
+anchor bottom 9,0
 L 3,0 3,20
 L 3,20 15,0
 L 15,0 15,20
 glyph 79 adv=20
+anchor top 10,20
 A 10,10 7.5,10 0 360
 glyph 80 adv=16
 L 3,20 3,0
@@ -176,18 +217,26 @@ glyph 81 adv=20
 A 10,10 7.5,10 0 360
 L 12,4 17,-1.5
 glyph 82 adv=17
+anchor top 8,20
+anchor bottom 8,0
 L 3,20 3,0
 L 3,20 9.5,20
 A 9.5,14.5 5.5,5.5 -90 90
 L 3,9 9.5,9
 L 9,9 15,0
 glyph 83 adv=16
+anchor top 8,20
+anchor bottom 8,0
 A 8,15 5.5,5 20 270
 A 8,5 5.5,5 200 450
 glyph 84 adv=15
+anchor top 7.5,20
+anchor bottom 7.5,0
 L 1.5,20 13.5,20
 L 7.5,20 7.5,0
 glyph 85 adv=18
+anchor top 9,20
+anchor ogonek 11,0
 L 3,20 3,6.5
 A 9,6.5 6,6.5 180 360
 L 15,6.5 15,20
@@ -195,6 +244,7 @@ glyph 86 adv=18
 L 2,20 9,0
 L 9,0 16,20
 glyph 87 adv=26
+anchor top 13,20
 L 2,20 7,0
 L 7,0 13,15
 L 13,15 19,0
@@ -203,10 +253,12 @@ glyph 88 adv=17
 L 2.5,20 14.5,0
 L 14.5,20 2.5,0
 glyph 89 adv=17
+anchor top 8.5,20
 L 2,20 8.5,9
 L 15,20 8.5,9
 L 8.5,9 8.5,0
 glyph 90 adv=16
+anchor top 8,20
 L 2.5,20 13.5,20
 L 13.5,20 2.5,0
 L 2.5,0 13.5,0
@@ -228,17 +280,24 @@ L 1,-3 13,-3
 glyph 96 adv=8
 L 3,21 5,18
 glyph 97 adv=15
+anchor top 7.5,14
+anchor ogonek 13,0
 A 7.5,7 5.5,7 0 360
 L 13,14 13,0
 glyph 98 adv=16
 L 3,21 3,0
 A 8.5,7 5.5,7 0 360
 glyph 99 adv=14
+anchor top 7.5,14
+anchor bottom 7.5,0
 A 7.5,7 5.5,7 45 315
 glyph 100 adv=16
+anchor caron 15.5,21
 L 13,21 13,0
 A 7.5,7 5.5,7 0 360
 glyph 101 adv=15
+anchor top 7.5,14
+anchor ogonek 8.5,0
 L 2,7.5 13,7.5
 A 7.5,7 5.5,7 0 315
 glyph 102 adv=10
@@ -246,15 +305,18 @@ Q 8.5,21 3.5,21 3.5,16
 L 3.5,16 3.5,0
 L 1,14 7.5,14
 glyph 103 adv=16
+anchor top 7.5,14
 A 7.5,7 5.5,7 0 360
 L 13,14 13,-1
 Q 13,-1 12.5,-6 7,-6
 L 7,-6 4,-6
 glyph 104 adv=16
+anchor top 3.5,21
 L 3,21 3,0
 A 8.5,8 5.5,6 0 180
 L 14,8 14,0
 glyph 105 adv=7
+anchor ogonek 3.5,0
 L 3.5,14 3.5,0
 D 3.5,19
 glyph 106 adv=7
@@ -262,10 +324,14 @@ L 4,14 4,-1
 Q 4,-1 4,-6 0,-6
 D 4,19
 glyph 107 adv=15
+anchor bottom 8,0
 L 3,21 3,0
 L 12.5,14 3,5.5
 L 6.5,8.5 13,0
 glyph 108 adv=7
+anchor top 3.5,21
+anchor bottom 3.5,0
+anchor caron 6.5,21
 L 3.5,21 3.5,0
 glyph 109 adv=24
 L 3,14 3,0
@@ -274,10 +340,13 @@ L 12,8.5 12,0
 A 16.5,8.5 4.5,5.5 0 180
 L 21,8.5 21,0
 glyph 110 adv=16
+anchor top 8.5,14
+anchor bottom 8.5,0
 L 3,14 3,0
 A 8.5,8 5.5,6 0 180
 L 14,8 14,0
 glyph 111 adv=16
+anchor top 8,14
 A 8,7 5.5,7 0 360
 glyph 112 adv=16
 L 3,14 3,-6
@@ -286,16 +355,24 @@ glyph 113 adv=16
 L 13,14 13,-6
 A 7.5,7 5.5,7 0 360
 glyph 114 adv=11
+anchor top 6,14
+anchor bottom 3,0
 L 3,14 3,0
 Q 3,9 5,14 9.5,14
 glyph 115 adv=13
+anchor top 6.5,14
+anchor bottom 6.5,0
 A 6.5,10.5 4.5,3.5 20 270
 A 6.5,3.5 4.5,3.5 200 450
 glyph 116 adv=10
+anchor bottom 6,0
+anchor caron 11,21
 L 4,19 4,4
 Q 4,4 4,0 8.5,0
 L 1,14 7.5,14
 glyph 117 adv=16
+anchor top 8.5,14
+anchor ogonek 14,0
 L 3,14 3,6
 A 8.5,6 5.5,6 180 360
 L 14,14 14,0
@@ -303,6 +380,7 @@ glyph 118 adv=15
 L 2,14 7.5,0
 L 7.5,0 13,14
 glyph 119 adv=22
+anchor top 11,14
 L 2,14 6,0
 L 6,0 11,11
 L 11,11 16,0
@@ -311,10 +389,12 @@ glyph 120 adv=14
 L 2,14 12,0
 L 12,14 2,0
 glyph 121 adv=15
+anchor top 7.5,14
 L 2,14 7.5,0
 L 13,14 7.5,0
 L 7.5,0 5,-6
 glyph 122 adv=13
+anchor top 6.5,14
 L 2,14 11,14
 L 11,14 2,0
 L 2,0 11,0
@@ -333,3 +413,1267 @@ Q 6.5,4 6.5,-3 2.5,-3
 glyph 126 adv=16
 Q 2,8 5,12 8,9
 Q 8,9 11,6 14,10
+
+# ---- Marks ----
+
+mark acute top above
+L -1,0 1.5,3
+mark grave top above
+L 1,0 -1.5,3
+mark circumflex top above
+L -3.5,0 0,3
+L 0,3 3.5,0
+mark caron top above
+L -3.5,3 0,0
+L 0,0 3.5,3
+mark dieresis top above
+D -2.75,0
+D 2.75,0
+mark dotaccent top above
+D 0,0
+mark tilde top above
+Q -4,0.5 -2,3 0,1.5
+Q 0,1.5 2,0 4,2.5
+mark macron top above
+L -3,0 3,0
+mark breve top above
+A 0,3 3.25,3 180 360
+mark ring top above
+A 0,3.5 3.5,3.5 0 360
+mark hungarumlaut top above
+L -4.25,0 -2.25,3
+L 2.25,0 4.25,3
+mark tonos top above
+L -0.5,0 1,3.5
+mark dieresistonos top above
+D -4.25,0
+D 4.25,0
+L 0,1.5 1.25,4.5
+mark commaturned top above
+Q -0.5,0 -0.5,1.75 0.75,3
+mark commaaccent bottom below
+Q 0.5,0 0.5,-1.5 -0.75,-2.5
+mark cedilla bottom attach
+Q 0,0 3,-3 -1,-5
+mark ogonek ogonek attach
+Q 0,0 -3,-4.5 1.5,-5.5
+mark caronvert caron attach
+L 0,0 -0.5,-3.5
+
+# ---- Latin-1 Supplement ----
+
+glyph U+00A1 adv=7  # ¡
+D 3.5,12.5
+L 3.5,7 3.5,-6
+glyph U+00A2 adv=14  # ¢
+A 7.5,7 5.5,7 45 315
+L 7.5,17 7.5,-3
+glyph U+00A3 adv=15  # £
+L 2.5,0 13,0
+Q 2.5,0 5,2 5,6
+L 5,6 5,15.5
+A 9,15.5 4,4.5 180 15
+L 2.5,10 10,10
+glyph U+00A4 adv=16  # ¤
+A 8,9.5 4.5,4.5 0 360
+L 4.8,12.7 2.75,14.75
+L 11.2,12.7 13.25,14.75
+L 4.8,6.3 2.75,4.25
+L 11.2,6.3 13.25,4.25
+glyph U+00A5 adv=17  # ¥
+L 2,20 8.5,9.5
+L 15,20 8.5,9.5
+L 8.5,9.5 8.5,0
+L 3.5,9.5 13.5,9.5
+L 3.5,4 13.5,4
+glyph U+00A6 adv=7  # ¦
+L 3.5,22 3.5,12
+L 3.5,6 3.5,-4
+glyph U+00A7 adv=14  # §
+A 7,16.5 4,3 20 270
+A 7,10 4.5,3.5 0 360
+A 7,3.5 4,3 200 450
+glyph U+00A8 adv=10  # ¨
+put dieresis 5,14
+glyph U+00A9 adv=22  # ©
+A 11,10 9.5,9.5 0 360
+A 11,10 4,4.5 45 315
+glyph U+00AA adv=11  # ª
+A 5.5,17.5 3,3.5 0 360
+L 8.5,21 8.5,14
+glyph U+00AB adv=16  # «
+L 7,12 3,7
+L 3,7 7,2
+L 12.5,12 8.5,7
+L 8.5,7 12.5,2
+glyph U+00AC adv=16  # ¬
+L 2,9 14,9
+L 14,9 14,4.5
+glyph U+00AD = U+002D  # soft hyphen
+glyph U+00AE adv=22  # ®
+A 11,10 9.5,9.5 0 360
+L 8.5,14 8.5,6
+L 8.5,14 11,14
+A 11,12 2,2 -90 90
+L 8.5,10 11,10
+L 11,10 13.5,6
+glyph U+00AF adv=10  # ¯
+put macron 5,14
+glyph U+00B0 adv=11  # °
+A 5.5,16.5 3.5,3.5 0 360
+glyph U+00B1 adv=16  # ±
+L 8,17 8,7.5
+L 2,12.25 14,12.25
+L 2,2 14,2
+glyph U+00B2 adv=10  # ²
+A 5.25,18.25 2.75,2.75 10 200
+Q 8,17 6.25,15 2.5,11
+L 2.5,11 8,11
+glyph U+00B3 adv=10  # ³
+A 5.25,18.5 2.6,2.5 -90 170
+A 5.4,13.6 2.85,2.6 -170 90
+glyph U+00B4 adv=8  # ´
+put acute 4,14
+glyph U+00B5 = U+03BC  # µ
+glyph U+00B6 adv=16  # ¶
+L 8.5,20 8.5,-3
+L 13.5,20 13.5,-3
+L 13.5,20 7,20
+A 7,14.5 4,5.5 90 270
+L 7,9 8.5,9
+glyph U+00B7 adv=7  # ·
+D 3.5,9
+glyph U+00B8 adv=8  # ¸
+put cedilla 4,0
+glyph U+00B9 adv=10  # ¹
+L 5.25,21 5.25,11
+L 3,18.75 5.25,21
+glyph U+00BA adv=11  # º
+A 5.5,17.5 3,3.5 0 360
+glyph U+00BB adv=16  # »
+L 3.5,12 7.5,7
+L 7.5,7 3.5,2
+L 9,12 13,7
+L 13,7 9,2
+glyph U+00BC adv=22  # ¼
+L 5.25,21 5.25,11
+L 3,18.75 5.25,21
+L 15.5,20 6.5,0
+L 17,9 13,2.7
+L 13,2.7 19,2.7
+L 17,9 17,0
+glyph U+00BD adv=22  # ½
+L 5.25,21 5.25,11
+L 3,18.75 5.25,21
+L 15.5,20 6.5,0
+A 15.7,6.5 2.5,2.5 10 200
+Q 18.2,5.4 16.6,3.6 13.25,0
+L 13.25,0 18.25,0
+glyph U+00BE adv=22  # ¾
+A 5.25,18.5 2.6,2.5 -90 170
+A 5.4,13.6 2.85,2.6 -170 90
+L 15.5,20 6.5,0
+L 17,9 13,2.7
+L 13,2.7 19,2.7
+L 17,9 17,0
+glyph U+00BF adv=14  # ¿
+A 7,0 5,5 170 380
+Q 2,2 7,5 7,8
+D 7,13.5
+glyph U+00C0 = U+0041 + grave  # À
+glyph U+00C1 = U+0041 + acute  # Á
+glyph U+00C2 = U+0041 + circumflex  # Â
+glyph U+00C3 = U+0041 + tilde  # Ã
+glyph U+00C4 = U+0041 + dieresis  # Ä
+glyph U+00C5 adv=18  # Å
+use U+0041
+put ring 9,20 touch
+glyph U+00C6 adv=23  # Æ
+L 2,0 11,20
+L 11,20 21,20
+L 11,20 11,0
+L 11,0 21,0
+L 11,10.5 19.5,10.5
+L 5.15,7 11,7
+glyph U+00C7 = U+0043 + cedilla  # Ç
+glyph U+00C8 = U+0045 + grave  # È
+glyph U+00C9 = U+0045 + acute  # É
+glyph U+00CA = U+0045 + circumflex  # Ê
+glyph U+00CB = U+0045 + dieresis  # Ë
+glyph U+00CC = U+0049 + grave  # Ì
+glyph U+00CD = U+0049 + acute  # Í
+glyph U+00CE = U+0049 + circumflex  # Î
+glyph U+00CF = U+0049 + dieresis  # Ï
+glyph U+00D0 adv=18  # Ð
+use U+0044
+L 0.5,10 7,10
+glyph U+00D1 = U+004E + tilde  # Ñ
+glyph U+00D2 = U+004F + grave  # Ò
+glyph U+00D3 = U+004F + acute  # Ó
+glyph U+00D4 = U+004F + circumflex  # Ô
+glyph U+00D5 = U+004F + tilde  # Õ
+glyph U+00D6 = U+004F + dieresis  # Ö
+glyph U+00D7 adv=16  # ×
+L 3.5,4.5 12.5,13.5
+L 12.5,4.5 3.5,13.5
+glyph U+00D8 adv=20  # Ø
+use U+004F
+L 3.5,-1 16.5,21
+glyph U+00D9 = U+0055 + grave  # Ù
+glyph U+00DA = U+0055 + acute  # Ú
+glyph U+00DB = U+0055 + circumflex  # Û
+glyph U+00DC = U+0055 + dieresis  # Ü
+glyph U+00DD = U+0059 + acute  # Ý
+glyph U+00DE adv=16  # Þ
+L 3,20 3,0
+L 3,15.5 9.5,15.5
+A 9.5,10.5 5,5 -90 90
+L 3,5.5 9.5,5.5
+glyph U+00DF adv=16  # ß
+L 3,0 3,16
+A 7.75,16 4.75,5 180 -90
+A 7.75,5.5 5.5,5.5 90 -130
+glyph U+00E0 = U+0061 + grave  # à
+glyph U+00E1 = U+0061 + acute  # á
+glyph U+00E2 = U+0061 + circumflex  # â
+glyph U+00E3 = U+0061 + tilde  # ã
+glyph U+00E4 = U+0061 + dieresis  # ä
+glyph U+00E5 = U+0061 + ring  # å
+glyph U+00E6 adv=22  # æ
+A 6.5,7 4.5,7 0 360
+L 11,14 11,0
+L 11,7.5 20,7.5
+A 15.5,7 4.5,7 0 315
+glyph U+00E7 = U+0063 + cedilla  # ç
+glyph U+00E8 = U+0065 + grave  # è
+glyph U+00E9 = U+0065 + acute  # é
+glyph U+00EA = U+0065 + circumflex  # ê
+glyph U+00EB = U+0065 + dieresis  # ë
+glyph U+00EC = U+0131 + grave  # ì
+glyph U+00ED = U+0131 + acute  # í
+glyph U+00EE = U+0131 + circumflex  # î
+glyph U+00EF = U+0131 + dieresis  # ï
+glyph U+00F0 adv=16  # ð
+A 8,6.5 5.5,6.5 0 360
+Q 13.5,6.5 13.5,15 6,20.5
+L 8,12.5 13.5,16.5
+glyph U+00F1 = U+006E + tilde  # ñ
+glyph U+00F2 = U+006F + grave  # ò
+glyph U+00F3 = U+006F + acute  # ó
+glyph U+00F4 = U+006F + circumflex  # ô
+glyph U+00F5 = U+006F + tilde  # õ
+glyph U+00F6 = U+006F + dieresis  # ö
+glyph U+00F7 adv=16  # ÷
+L 2,9 14,9
+D 8,14.5
+D 8,3.5
+glyph U+00F8 adv=16  # ø
+use U+006F
+L 2.5,-1 13.5,15
+glyph U+00F9 = U+0075 + grave  # ù
+glyph U+00FA = U+0075 + acute  # ú
+glyph U+00FB = U+0075 + circumflex  # û
+glyph U+00FC = U+0075 + dieresis  # ü
+glyph U+00FD = U+0079 + acute  # ý
+glyph U+00FE adv=16  # þ
+use U+0062
+L 3,0 3,-6
+glyph U+00FF = U+0079 + dieresis  # ÿ
+
+# ---- Latin Extended-A ----
+
+glyph U+0100 = U+0041 + macron  # Ā
+glyph U+0101 = U+0061 + macron  # ā
+glyph U+0102 = U+0041 + breve  # Ă
+glyph U+0103 = U+0061 + breve  # ă
+glyph U+0104 = U+0041 + ogonek  # Ą
+glyph U+0105 = U+0061 + ogonek  # ą
+glyph U+0106 = U+0043 + acute  # Ć
+glyph U+0107 = U+0063 + acute  # ć
+glyph U+0108 = U+0043 + circumflex  # Ĉ
+glyph U+0109 = U+0063 + circumflex  # ĉ
+glyph U+010A = U+0043 + dotaccent  # Ċ
+glyph U+010B = U+0063 + dotaccent  # ċ
+glyph U+010C = U+0043 + caron  # Č
+glyph U+010D = U+0063 + caron  # č
+glyph U+010E = U+0044 + caron  # Ď
+glyph U+010F adv=18 = U+0064 + caronvert  # ď
+glyph U+0110 = U+00D0  # Đ
+glyph U+0111 adv=17  # đ
+use U+0064
+L 9.5,17.5 15.5,17.5
+glyph U+0112 = U+0045 + macron  # Ē
+glyph U+0113 = U+0065 + macron  # ē
+glyph U+0114 = U+0045 + breve  # Ĕ
+glyph U+0115 = U+0065 + breve  # ĕ
+glyph U+0116 = U+0045 + dotaccent  # Ė
+glyph U+0117 = U+0065 + dotaccent  # ė
+glyph U+0118 = U+0045 + ogonek  # Ę
+glyph U+0119 = U+0065 + ogonek  # ę
+glyph U+011A = U+0045 + caron  # Ě
+glyph U+011B = U+0065 + caron  # ě
+glyph U+011C = U+0047 + circumflex  # Ĝ
+glyph U+011D = U+0067 + circumflex  # ĝ
+glyph U+011E = U+0047 + breve  # Ğ
+glyph U+011F = U+0067 + breve  # ğ
+glyph U+0120 = U+0047 + dotaccent  # Ġ
+glyph U+0121 = U+0067 + dotaccent  # ġ
+glyph U+0122 = U+0047 + commaaccent  # Ģ
+glyph U+0123 = U+0067 + commaturned  # ģ
+glyph U+0124 = U+0048 + circumflex  # Ĥ
+glyph U+0125 = U+0068 + circumflex  # ĥ
+glyph U+0126 adv=18  # Ħ
+use U+0048
+L 1,15.5 17,15.5
+glyph U+0127 adv=16  # ħ
+use U+0068
+L 0.5,17.5 7.5,17.5
+glyph U+0128 = U+0049 + tilde  # Ĩ
+glyph U+0129 = U+0131 + tilde  # ĩ
+glyph U+012A = U+0049 + macron  # Ī
+glyph U+012B = U+0131 + macron  # ī
+glyph U+012C = U+0049 + breve  # Ĭ
+glyph U+012D = U+0131 + breve  # ĭ
+glyph U+012E = U+0049 + ogonek  # Į
+glyph U+012F = U+0069 + ogonek  # į
+glyph U+0130 = U+0049 + dotaccent  # İ
+glyph U+0131 adv=7  # ı
+L 3.5,14 3.5,0
+anchor top 3.5,14
+anchor ogonek 3.5,0
+glyph U+0132 adv=20  # Ĳ
+use U+0049
+use U+004A 7,0
+glyph U+0133 adv=12  # ĳ
+use U+0069
+use U+006A 5,0
+glyph U+0134 = U+004A + circumflex  # Ĵ
+glyph U+0135 = U+0237 + circumflex  # ĵ
+glyph U+0136 = U+004B + commaaccent  # Ķ
+glyph U+0137 = U+006B + commaaccent  # ķ
+glyph U+0138 adv=15  # ĸ
+L 3,14 3,0
+L 12.5,14 3,5.5
+L 6.5,8.5 13,0
+anchor top 7.5,14
+glyph U+0139 = U+004C + acute  # Ĺ
+glyph U+013A = U+006C + acute  # ĺ
+glyph U+013B = U+004C + commaaccent  # Ļ
+glyph U+013C = U+006C + commaaccent  # ļ
+glyph U+013D = U+004C + caronvert  # Ľ
+glyph U+013E adv=9 = U+006C + caronvert  # ľ
+glyph U+013F adv=14  # Ŀ
+use U+004C
+D 9,10
+glyph U+0140 adv=11  # ŀ
+use U+006C
+D 8.5,10.5
+glyph U+0141 adv=15  # Ł
+use U+004C 1,0
+L 1,8 7,12
+glyph U+0142 adv=9  # ł
+use U+006C 1,0
+L 1.5,9 7.5,13
+glyph U+0143 = U+004E + acute  # Ń
+glyph U+0144 = U+006E + acute  # ń
+glyph U+0145 = U+004E + commaaccent  # Ņ
+glyph U+0146 = U+006E + commaaccent  # ņ
+glyph U+0147 = U+004E + caron  # Ň
+glyph U+0148 = U+006E + caron  # ň
+glyph U+0149 adv=21  # ŉ
+L 3,20 3,15
+use U+006E 5,0
+glyph U+014A adv=18  # Ŋ
+use U+004E
+L 15,0 15,-2
+Q 15,-2 15,-6 11,-6
+glyph U+014B adv=16  # ŋ
+L 3,14 3,0
+A 8.5,8 5.5,6 0 180
+L 14,8 14,-2
+Q 14,-2 14,-6 10.5,-6
+glyph U+014C = U+004F + macron  # Ō
+glyph U+014D = U+006F + macron  # ō
+glyph U+014E = U+004F + breve  # Ŏ
+glyph U+014F = U+006F + breve  # ŏ
+glyph U+0150 = U+004F + hungarumlaut  # Ő
+glyph U+0151 = U+006F + hungarumlaut  # ő
+glyph U+0152 adv=23  # Œ
+A 10,10 7.5,10 90 270
+L 10,20 21,20
+L 10,20 10,0
+L 10,0 21,0
+L 10,10.5 19.5,10.5
+glyph U+0153 adv=22  # œ
+A 6.5,7 4.5,7 0 360
+L 11,7.5 20,7.5
+A 15.5,7 4.5,7 0 315
+glyph U+0154 = U+0052 + acute  # Ŕ
+glyph U+0155 = U+0072 + acute  # ŕ
+glyph U+0156 = U+0052 + commaaccent  # Ŗ
+glyph U+0157 = U+0072 + commaaccent  # ŗ
+glyph U+0158 = U+0052 + caron  # Ř
+glyph U+0159 = U+0072 + caron  # ř
+glyph U+015A = U+0053 + acute  # Ś
+glyph U+015B = U+0073 + acute  # ś
+glyph U+015C = U+0053 + circumflex  # Ŝ
+glyph U+015D = U+0073 + circumflex  # ŝ
+glyph U+015E = U+0053 + cedilla  # Ş
+glyph U+015F = U+0073 + cedilla  # ş
+glyph U+0160 = U+0053 + caron  # Š
+glyph U+0161 = U+0073 + caron  # š
+glyph U+0162 = U+0054 + cedilla  # Ţ
+glyph U+0163 = U+0074 + cedilla  # ţ
+glyph U+0164 = U+0054 + caron  # Ť
+glyph U+0165 adv=13 = U+0074 + caronvert  # ť
+glyph U+0166 adv=15  # Ŧ
+use U+0054
+L 4,10 11,10
+glyph U+0167 adv=10  # ŧ
+use U+0074
+L 1.5,8.5 7,8.5
+glyph U+0168 = U+0055 + tilde  # Ũ
+glyph U+0169 = U+0075 + tilde  # ũ
+glyph U+016A = U+0055 + macron  # Ū
+glyph U+016B = U+0075 + macron  # ū
+glyph U+016C = U+0055 + breve  # Ŭ
+glyph U+016D = U+0075 + breve  # ŭ
+glyph U+016E adv=18  # Ů
+use U+0055
+put ring 9,22 touch
+glyph U+016F = U+0075 + ring  # ů
+glyph U+0170 = U+0055 + hungarumlaut  # Ű
+glyph U+0171 = U+0075 + hungarumlaut  # ű
+glyph U+0172 = U+0055 + ogonek  # Ų
+glyph U+0173 = U+0075 + ogonek  # ų
+glyph U+0174 = U+0057 + circumflex  # Ŵ
+glyph U+0175 = U+0077 + circumflex  # ŵ
+glyph U+0176 = U+0059 + circumflex  # Ŷ
+glyph U+0177 = U+0079 + circumflex  # ŷ
+glyph U+0178 = U+0059 + dieresis  # Ÿ
+glyph U+0179 = U+005A + acute  # Ź
+glyph U+017A = U+007A + acute  # ź
+glyph U+017B = U+005A + dotaccent  # Ż
+glyph U+017C = U+007A + dotaccent  # ż
+glyph U+017D = U+005A + caron  # Ž
+glyph U+017E = U+007A + caron  # ž
+glyph U+017F adv=9  # ſ
+Q 8.5,21 3.5,21 3.5,16
+L 3.5,16 3.5,0
+
+# ---- Latin Extended-B ----
+
+glyph U+0192 adv=13  # ƒ
+Q 12,21 8,21 7.5,16
+L 7.5,16 6.5,-1
+Q 6.5,-1 6,-6 2,-6
+L 3.5,13 10.5,13
+glyph U+0218 = U+0053 + commaaccent  # Ș
+glyph U+0219 = U+0073 + commaaccent  # ș
+glyph U+021A = U+0054 + commaaccent  # Ț
+glyph U+021B = U+0074 + commaaccent  # ț
+glyph U+0237 adv=7  # ȷ
+L 4,14 4,-1
+Q 4,-1 4,-6 0,-6
+anchor top 4,14
+
+# ---- Spacing modifier letters: the marks on their own ----
+
+glyph U+02C6 adv=10  # ˆ
+put circumflex 5,14
+glyph U+02C7 adv=10  # ˇ
+put caron 5,14
+glyph U+02D8 adv=10  # ˘
+put breve 5,14
+glyph U+02D9 adv=7  # ˙
+put dotaccent 3.5,14
+glyph U+02DA adv=10  # ˚
+put ring 5,14
+glyph U+02DB adv=8  # ˛
+put ogonek 4.5,0
+glyph U+02DC adv=10  # ˜
+put tilde 5,14
+glyph U+02DD adv=12  # ˝
+put hungarumlaut 6,14
+
+# ---- Greek. Letters shaped like Latin ones use the Latin drawing ----
+
+glyph U+0386 adv=21  # Ά
+use U+0041 3,0
+put tonos 1.75,16.5 touch
+glyph U+0388 adv=20  # Έ
+use U+0045 5,0
+put tonos 1.75,16.5 touch
+glyph U+0389 adv=23  # Ή
+use U+0048 5,0
+put tonos 1.75,16.5 touch
+glyph U+038A adv=12  # Ί
+use U+0049 5,0
+put tonos 1.75,16.5 touch
+glyph U+038C adv=24  # Ό
+use U+004F 4,0
+put tonos 1.75,16.5 touch
+glyph U+038E adv=21  # Ύ
+use U+03A5 4,0
+put tonos 1.75,16.5 touch
+glyph U+038F adv=23  # Ώ
+use U+03A9 3.5,0
+put tonos 1.75,16.5 touch
+glyph U+0390 = U+03B9 + dieresistonos  # ΐ
+glyph U+0391 = U+0041  # Α
+glyph U+0392 = U+0042  # Β
+glyph U+0393 adv=14  # Γ
+L 3,20 3,0
+L 3,20 13,20
+anchor top 7.5,20
+glyph U+0394 adv=18  # Δ
+L 2,0 9,20
+L 9,20 16,0
+L 2,0 16,0
+glyph U+0395 = U+0045  # Ε
+glyph U+0396 = U+005A  # Ζ
+glyph U+0397 = U+0048  # Η
+glyph U+0398 adv=20  # Θ
+use U+004F
+L 6.5,10 13.5,10
+glyph U+0399 = U+0049  # Ι
+glyph U+039A = U+004B  # Κ
+glyph U+039B adv=18  # Λ
+L 2,0 9,20
+L 9,20 16,0
+glyph U+039C = U+004D  # Μ
+glyph U+039D = U+004E  # Ν
+glyph U+039E adv=16  # Ξ
+L 2.5,20 13.5,20
+L 4,10 12,10
+L 2.5,0 13.5,0
+glyph U+039F = U+004F  # Ο
+glyph U+03A0 adv=18  # Π
+L 3,0 3,20
+L 3,20 15,20
+L 15,20 15,0
+glyph U+03A1 = U+0050  # Ρ
+glyph U+03A3 adv=16  # Σ
+L 13.5,20 2.5,20
+L 2.5,20 9,10
+L 9,10 2.5,0
+L 2.5,0 13.5,0
+glyph U+03A4 = U+0054  # Τ
+glyph U+03A5 = U+0059  # Υ
+glyph U+03A6 adv=20  # Φ
+L 10,20 10,0
+A 10,10 7.5,6 0 360
+glyph U+03A7 = U+0058  # Χ
+glyph U+03A8 adv=20  # Ψ
+L 10,20 10,0
+L 3.5,20 3.5,13.5
+A 10,13.5 6.5,6.5 180 360
+L 16.5,13.5 16.5,20
+glyph U+03A9 adv=20  # Ω
+A 10,11.5 7.5,8.5 -55 235
+L 14.3,4.54 13,0
+L 5.7,4.54 7,0
+L 2.5,0 7,0
+L 13,0 17.5,0
+anchor top 10,20
+glyph U+03AA = U+0399 + dieresis  # Ϊ
+glyph U+03AB = U+03A5 + dieresis  # Ϋ
+glyph U+03AC = U+03B1 + tonos  # ά
+glyph U+03AD = U+03B5 + tonos  # έ
+glyph U+03AE = U+03B7 + tonos  # ή
+glyph U+03AF = U+03B9 + tonos  # ί
+glyph U+03B0 = U+03C5 + dieresistonos  # ΰ
+glyph U+03B1 adv=16  # α
+A 7.5,7 5.5,7 0 360
+L 13,14 13,3
+Q 13,3 13,0 15,0
+anchor top 7.5,14
+glyph U+03B2 adv=16  # β
+L 3,-6 3,16.5
+A 7.5,16.5 4.5,4.5 180 -90
+A 7.5,6 5.5,6 90 -150
+glyph U+03B3 adv=15  # γ
+L 2,14 7.5,0
+L 13,14 7.5,0
+L 7.5,0 7.5,-6
+glyph U+03B4 adv=16  # δ
+A 8,6.5 5.5,6.5 0 360
+Q 8,13 3,16.5 5.5,19.5
+Q 5.5,19.5 7.5,21.5 12,20.5
+glyph U+03B5 adv=13  # ε
+A 7.5,10.5 4.5,3.5 40 270
+A 7.5,3.5 5,3.5 90 320
+anchor top 7.5,14
+glyph U+03B6 adv=13  # ζ
+L 3.5,21 11.5,21
+Q 11.5,21 2.5,13 2.5,5
+Q 2.5,5 2.5,0.5 7.5,0.5
+Q 7.5,0.5 11,0.5 9.5,-5
+glyph U+03B7 adv=16  # η
+L 3,14 3,0
+A 8.5,8 5.5,6 0 180
+L 14,8 14,-6
+anchor top 8.5,14
+glyph U+03B8 adv=15  # θ
+A 7.5,10.5 5,10.5 0 360
+L 2.5,10.5 12.5,10.5
+glyph U+03B9 adv=8  # ι
+L 3.5,14 3.5,3
+Q 3.5,3 3.5,0 6.5,0
+anchor top 3.5,14
+glyph U+03BA = U+0138  # κ
+glyph U+03BB adv=15  # λ
+L 3,21 13,0
+L 7.71,11.1 2,0
+glyph U+03BC adv=16  # μ
+use U+0075
+L 3,6 3,-6
+glyph U+03BD = U+0076  # ν
+glyph U+03BE adv=13  # ξ
+L 4,21 11,21
+A 8,17.5 4.5,3.5 90 270
+L 8,14 10.5,14
+A 8,7 5.5,7 90 270
+Q 8,0 11,0 9.5,-5
+glyph U+03BF = U+006F  # ο
+glyph U+03C0 adv=16  # π
+L 1.5,14 14.5,14
+L 4.5,14 4.5,0
+L 11.5,14 11.5,0
+glyph U+03C1 adv=16  # ρ
+A 8.5,7 5.5,7 0 360
+L 3,7 3,-6
+glyph U+03C2 adv=14  # ς
+A 8,7 5.5,7 45 270
+Q 8,0 12,0 10,-5
+glyph U+03C3 adv=16  # σ
+A 7.5,7 5.5,7 0 360
+L 7.5,14 14.5,14
+glyph U+03C4 adv=13  # τ
+L 1.5,14 12,14
+L 6.5,14 6.5,3
+Q 6.5,3 6.5,0 9.5,0
+glyph U+03C5 adv=16  # υ
+L 3,14 3,6
+A 8,6 5,6 180 360
+L 13,6 13,14
+anchor top 8,14
+glyph U+03C6 adv=18  # φ
+L 9,16 9,-6
+A 9,7 6,7 0 360
+glyph U+03C7 adv=15  # χ
+L 2,14 13,-6
+L 13,14 2,-6
+glyph U+03C8 adv=18  # ψ
+L 9,21 9,-6
+L 3,14 3,8
+A 9,8 6,6 180 360
+L 15,8 15,14
+glyph U+03C9 adv=20  # ω
+L 2.5,14 2.5,6
+A 6.25,6 3.75,6 180 360
+L 10,6 10,9
+A 13.75,6 3.75,6 180 360
+L 17.5,6 17.5,14
+anchor top 10,14
+glyph U+03CA = U+03B9 + dieresis  # ϊ
+glyph U+03CB = U+03C5 + dieresis  # ϋ
+glyph U+03CC = U+03BF + tonos  # ό
+glyph U+03CD = U+03C5 + tonos  # ύ
+glyph U+03CE = U+03C9 + tonos  # ώ
+
+# ---- Cyrillic. Letters shaped like Latin ones use the Latin drawing ----
+
+glyph U+0400 = U+0415 + grave  # Ѐ
+glyph U+0401 = U+0415 + dieresis  # Ё
+glyph U+0402 adv=18  # Ђ
+L 1.5,20 12,20
+L 5,20 5,0
+A 10,7 5,5 180 0
+L 15,7 15,1
+Q 15,1 15,-2.5 11.5,-2.5
+glyph U+0403 = U+0413 + acute  # Ѓ
+glyph U+0404 adv=18  # Є
+A 9.5,10 7,10 40 320
+L 2.5,10 11,10
+glyph U+0405 = U+0053  # Ѕ
+glyph U+0406 = U+0049  # І
+glyph U+0407 = U+0406 + dieresis  # Ї
+glyph U+0408 = U+004A  # Ј
+glyph U+0409 adv=26  # Љ
+L 5,20 13,20
+L 13,20 13,0
+Q 5,20 5,1.5 1.5,0
+L 13,11 18,11
+A 18,5.5 5.5,5.5 -90 90
+L 13,0 18,0
+glyph U+040A adv=25  # Њ
+L 3,20 3,0
+L 12,20 12,0
+L 3,11 17,11
+A 17,5.5 5.5,5.5 -90 90
+L 12,0 17,0
+glyph U+040B adv=18  # Ћ
+L 1.5,20 12,20
+L 5,20 5,0
+A 10,7 5,5 180 0
+L 15,7 15,0
+glyph U+040C = U+041A + acute  # Ќ
+glyph U+040D = U+0418 + grave  # Ѝ
+glyph U+040E = U+0423 + breve  # Ў
+glyph U+040F adv=18  # Џ
+L 3,20 3,0
+L 3,0 15,0
+L 15,0 15,20
+L 9,0 9,-4
+glyph U+0410 = U+0041  # А
+glyph U+0411 adv=17  # Б
+L 13,20 3,20
+L 3,20 3,0
+L 3,11 10,11
+A 10,5.5 5.5,5.5 -90 90
+L 3,0 10,0
+glyph U+0412 = U+0042  # В
+glyph U+0413 = U+0393  # Г
+glyph U+0414 adv=18  # Д
+L 6,20 14,20
+L 14,20 14,0
+Q 6,20 6,3 3,0
+L 1.5,0 16.5,0
+L 1.5,0 1.5,-4
+L 16.5,0 16.5,-4
+glyph U+0415 = U+0045  # Е
+glyph U+0416 adv=22  # Ж
+L 11,20 11,0
+L 2.5,20 11,10
+L 19.5,20 11,10
+L 8.45,13 1.5,0
+L 13.55,13 20.5,0
+glyph U+0417 = U+0033  # З
+glyph U+0418 adv=18  # И
+L 3,20 3,0
+L 3,0 15,20
+L 15,20 15,0
+anchor top 9,20
+glyph U+0419 = U+0418 + breve  # Й
+glyph U+041A = U+004B  # К
+glyph U+041B adv=17  # Л
+L 5,20 14,20
+L 14,20 14,0
+Q 5,20 5,1.5 1.5,0
+glyph U+041C = U+004D  # М
+glyph U+041D = U+0048  # Н
+glyph U+041E = U+004F  # О
+glyph U+041F = U+03A0  # П
+glyph U+0420 = U+0050  # Р
+glyph U+0421 = U+0043  # С
+glyph U+0422 = U+0054  # Т
+glyph U+0423 adv=18  # У
+L 2,20 10.4,6.5
+L 16,20 9,3
+Q 9,3 7.5,0 4,0
+anchor top 9,20
+glyph U+0424 = U+03A6  # Ф
+glyph U+0425 = U+0058  # Х
+glyph U+0426 adv=18  # Ц
+L 3,20 3,0
+L 3,0 16,0
+L 14,20 14,0
+L 16,0 16,-4
+glyph U+0427 adv=17  # Ч
+L 3,20 3,14
+A 8.5,14 5.5,5 180 270
+L 8.5,9 14,9
+L 14,20 14,0
+glyph U+0428 adv=22  # Ш
+L 3,20 3,0
+L 11,20 11,0
+L 19,20 19,0
+L 3,0 19,0
+glyph U+0429 adv=23  # Щ
+use U+0428
+L 19,0 21,0
+L 21,0 21,-4
+glyph U+042A adv=18  # Ъ
+L 1,20 5,20
+L 5,20 5,0
+L 5,11 11,11
+A 11,5.5 5.5,5.5 -90 90
+L 5,0 11,0
+glyph U+042B adv=22  # Ы
+L 3,20 3,0
+L 3,11 9,11
+A 9,5.5 5.5,5.5 -90 90
+L 3,0 9,0
+L 19.5,20 19.5,0
+glyph U+042C adv=17  # Ь
+L 3,20 3,0
+L 3,11 10,11
+A 10,5.5 5.5,5.5 -90 90
+L 3,0 10,0
+glyph U+042D adv=18  # Э
+A 8.5,10 7,10 140 -140
+L 6,10 15,10
+glyph U+042E adv=23  # Ю
+L 3,20 3,0
+L 3,10 7.5,10
+A 14,10 6.5,10 0 360
+glyph U+042F adv=17  # Я
+L 14,20 14,0
+L 14,20 7.5,20
+A 7.5,14.5 5.5,5.5 90 270
+L 14,9 7.5,9
+L 8,9 2,0
+glyph U+0430 = U+0061  # а
+glyph U+0431 adv=16  # б
+A 8,7 5.5,7 0 360
+Q 2.5,7 2.5,19 12.5,21
+glyph U+0432 adv=15  # в
+L 3,14 3,0
+L 3,14 8,14
+A 8,10.75 3.5,3.25 -90 90
+L 3,7.5 9,7.5
+A 9,3.75 4,3.75 -90 90
+L 3,0 9,0
+glyph U+0433 adv=12  # г
+L 3,14 3,0
+L 3,14 11,14
+anchor top 6.5,14
+glyph U+0434 adv=16  # д
+L 5,14 12,14
+L 12,14 12,0
+Q 5,14 5,1.5 2.5,0
+L 1.5,0 14,0
+L 1.5,0 1.5,-4
+L 14,0 14,-4
+glyph U+0435 = U+0065  # е
+glyph U+0436 adv=20  # ж
+L 10,14 10,0
+L 2.5,14 10,7
+L 17.5,14 10,7
+L 7.86,9 2,0
+L 12.14,9 18,0
+glyph U+0437 adv=14  # з
+A 7,10.5 4.25,3.5 -90 170
+A 7.3,3.75 4.75,3.75 -170 90
+glyph U+0438 adv=16  # и
+L 3,14 3,0
+L 3,0 13,14
+L 13,14 13,0
+anchor top 8,14
+glyph U+0439 = U+0438 + breve  # й
+glyph U+043A = U+0138  # к
+glyph U+043B adv=16  # л
+L 5,14 13,14
+L 13,14 13,0
+Q 5,14 5,1 1.5,0
+glyph U+043C adv=18  # м
+L 3,0 3,14
+L 3,14 9,4
+L 9,4 15,14
+L 15,14 15,0
+glyph U+043D adv=16  # н
+L 3,14 3,0
+L 13,14 13,0
+L 3,7 13,7
+glyph U+043E = U+006F  # о
+glyph U+043F adv=16  # п
+L 3,0 3,14
+L 3,14 13,14
+L 13,14 13,0
+glyph U+0440 = U+0070  # р
+glyph U+0441 = U+0063  # с
+glyph U+0442 adv=14  # т
+L 1.5,14 12.5,14
+L 7,14 7,0
+glyph U+0443 = U+0079  # у
+glyph U+0444 adv=18  # ф
+L 9,21 9,-6
+A 9,7 6,7 0 360
+glyph U+0445 = U+0078  # х
+glyph U+0446 adv=16  # ц
+L 3,14 3,0
+L 3,0 14.5,0
+L 13,14 13,0
+L 14.5,0 14.5,-4
+glyph U+0447 adv=15  # ч
+L 3,14 3,9.5
+A 7.5,9.5 4.5,3.5 180 270
+L 7.5,6 12.5,6
+L 12.5,14 12.5,0
+glyph U+0448 adv=20  # ш
+L 3,14 3,0
+L 10,14 10,0
+L 17,14 17,0
+L 3,0 17,0
+glyph U+0449 adv=21  # щ
+use U+0448
+L 17,0 19,0
+L 19,0 19,-4
+glyph U+044A adv=16  # ъ
+L 1,14 4.5,14
+L 4.5,14 4.5,0
+L 4.5,8 9.5,8
+A 9.5,4 4,4 -90 90
+L 4.5,0 9.5,0
+glyph U+044B adv=20  # ы
+L 3,14 3,0
+L 3,8 7.5,8
+A 7.5,4 4,4 -90 90
+L 3,0 7.5,0
+L 16.5,14 16.5,0
+glyph U+044C adv=14  # ь
+L 3,14 3,0
+L 3,8 8,8
+A 8,4 4,4 -90 90
+L 3,0 8,0
+glyph U+044D adv=14  # э
+A 6.5,7 5.5,7 135 -135
+L 4.5,7 12,7
+glyph U+044E adv=20  # ю
+L 3,14 3,0
+L 3,7 6.5,7
+A 12,7 5.5,7 0 360
+glyph U+044F adv=15  # я
+L 12,14 12,0
+L 12,14 7,14
+A 7,10.75 4,3.25 90 270
+L 12,7.5 7,7.5
+L 7.5,7.5 2.5,0
+glyph U+0450 = U+0435 + grave  # ѐ
+glyph U+0451 = U+0435 + dieresis  # ё
+glyph U+0452 adv=16  # ђ
+L 3,21 3,0
+L 0.5,17.5 7.5,17.5
+A 8.5,8 5.5,6 0 180
+L 14,8 14,-2
+Q 14,-2 14,-6 10.5,-6
+glyph U+0453 = U+0433 + acute  # ѓ
+glyph U+0454 adv=14  # є
+A 7.5,7 5.5,7 45 315
+L 2,7 9.5,7
+glyph U+0455 = U+0073  # ѕ
+glyph U+0456 = U+0069  # і
+glyph U+0457 = U+0131 + dieresis  # ї
+glyph U+0458 = U+006A  # ј
+glyph U+0459 adv=22  # љ
+L 5,14 11,14
+L 11,14 11,0
+Q 5,14 5,1 1.5,0
+L 11,8 15.5,8
+A 15.5,4 4,4 -90 90
+L 11,0 15.5,0
+glyph U+045A adv=22  # њ
+L 3,14 3,0
+L 11,14 11,0
+L 3,8 15.5,8
+A 15.5,4 4,4 -90 90
+L 11,0 15.5,0
+glyph U+045B = U+0127  # ћ
+glyph U+045C = U+043A + acute  # ќ
+glyph U+045D = U+0438 + grave  # ѝ
+glyph U+045E = U+0443 + breve  # ў
+glyph U+045F adv=16  # џ
+L 3,14 3,0
+L 3,0 13,0
+L 13,0 13,14
+L 8,0 8,-4
+glyph U+0490 adv=14  # Ґ
+use U+0393
+L 13,20 13,24
+glyph U+0491 adv=12  # ґ
+use U+0433
+L 11,14 11,17.5
+glyph U+0492 adv=15  # Ғ
+use U+0393 1,0
+L 1,10 9,10
+glyph U+0493 adv=13  # ғ
+use U+0433 1,0
+L 1,7 8,7
+glyph U+049A adv=18  # Қ
+use U+004B
+L 15,0 16.5,0
+L 16.5,0 16.5,-4
+glyph U+049B adv=16  # қ
+use U+0138
+L 13,0 14.5,0
+L 14.5,0 14.5,-4
+glyph U+04A2 adv=19  # Ң
+use U+0048
+L 15,0 17,0
+L 17,0 17,-4
+glyph U+04A3 adv=17  # ң
+use U+043D
+L 13,0 15,0
+L 15,0 15,-4
+glyph U+04AE = U+0059  # Ү
+glyph U+04AF adv=15  # ү
+L 2,14 7.5,4
+L 13,14 7.5,4
+L 7.5,4 7.5,-6
+glyph U+04B0 adv=17  # Ұ
+use U+0059
+L 4,5 13,5
+glyph U+04B1 adv=15  # ұ
+use U+04AF
+L 4,-0.5 11,-0.5
+glyph U+04BA adv=18  # Һ
+L 3,20 3,0
+A 9,9 6,6.5 0 180
+L 15,9 15,0
+glyph U+04BB = U+0068  # һ
+glyph U+04D8 adv=18  # Ә
+L 2,9.5 16,9.5
+A 9,10 7,10 180 495
+glyph U+04D9 adv=15  # ә
+L 2,6.5 13,6.5
+A 7.5,7 5.5,7 180 495
+glyph U+04E8 adv=20  # Ө
+use U+004F
+L 2.5,10 17.5,10
+glyph U+04E9 adv=16  # ө
+use U+006F
+L 2.5,7 13.5,7
+
+# ---- General punctuation and spaces (spaces are empty glyphs of the right width) ----
+
+glyph U+2007 adv=16  # figure space
+glyph U+2008 adv=7  # punctuation space
+glyph U+2009 adv=5  # thin space
+glyph U+200A adv=2  # hair space
+glyph U+2010 = U+002D  # ‐
+glyph U+2011 = U+002D  # ‑
+glyph U+2012 adv=16  # ‒
+L 2.5,8.5 13.5,8.5
+glyph U+2013 adv=14  # –
+L 2,8.5 12,8.5
+glyph U+2014 adv=24  # —
+L 2,8.5 22,8.5
+glyph U+2015 adv=24  # ―
+L 1.5,8.5 22.5,8.5
+glyph U+2018 adv=7  # ‘
+Q 2,14.5 2,17.5 3.5,20
+glyph U+2019 adv=7  # ’
+Q 3.5,20 3.5,17 2,14.5
+glyph U+201A = U+002C  # ‚
+glyph U+201C adv=12  # “
+Q 2,14.5 2,17.5 3.5,20
+Q 7,14.5 7,17.5 8.5,20
+glyph U+201D adv=12  # ”
+Q 3.5,20 3.5,17 2,14.5
+Q 8.5,20 8.5,17 7,14.5
+glyph U+201E adv=12  # „
+Q 3.5,2 3.5,-1 2,-3.5
+Q 8.5,2 8.5,-1 7,-3.5
+glyph U+2020 adv=14  # †
+L 7,20 7,-3
+L 2.5,14 11.5,14
+glyph U+2021 adv=14  # ‡
+L 7,20 7,-3
+L 2.5,14.5 11.5,14.5
+L 2.5,3.5 11.5,3.5
+glyph U+2022 adv=12  # •
+A 6,9 1.5,1.5 0 360
+D 6,9
+glyph U+2026 adv=21  # …
+D 3.5,1.5
+D 10.5,1.5
+D 17.5,1.5
+glyph U+202F adv=5  # narrow no-break space
+glyph U+2030 adv=31  # ‰
+L 17,20 3,0
+A 5,15.5 3.5,3.5 0 360
+A 15,4.5 3,3.5 0 360
+A 26,4.5 3,3.5 0 360
+glyph U+2032 adv=7  # ′
+L 4,20 2.5,14.5
+glyph U+2033 adv=12  # ″
+L 4,20 2.5,14.5
+L 9,20 7.5,14.5
+glyph U+2039 adv=10  # ‹
+L 7,12 3,7
+L 3,7 7,2
+glyph U+203A adv=10  # ›
+L 3,12 7,7
+L 7,7 3,2
+glyph U+203C adv=13  # ‼
+L 3.5,20 3.5,7
+D 3.5,1.5
+L 9.5,20 9.5,7
+D 9.5,1.5
+glyph U+2044 adv=8  # ⁄
+L 8,20 0,0
+
+# ---- Currency ----
+
+glyph U+20A9 adv=26  # ₩
+use U+0057
+L 1,13 25,13
+L 1,7.5 25,7.5
+glyph U+20AA adv=21  # ₪
+L 3,0 3,12
+A 8,12 5,4 180 0
+L 13,12 13,5
+L 18,16 18,4
+A 13,4 5,4 0 -180
+L 8,4 8,11
+glyph U+20AB adv=17  # ₫
+use U+0111 0,2
+L 3,-3.5 15,-3.5
+glyph U+20AC adv=18  # €
+A 10.5,10 7,10 40 320
+L 1.5,12.5 11.5,12.5
+L 1.5,7 10.5,7
+glyph U+20B1 adv=17  # ₱
+use U+0050 1,0
+L 1,17 16,17
+L 1,12 16,12
+glyph U+20B4 adv=16  # ₴
+A 8,15.5 5,4.5 160 -40
+L 11.83,12.61 3.3,6.04
+A 8,4.5 5,4.5 160 340
+L 2,13.5 14,13.5
+L 2,8 14,8
+glyph U+20B8 adv=15  # ₸
+L 1.5,20 13.5,20
+L 1.5,15 13.5,15
+L 7.5,15 7.5,0
+glyph U+20B9 adv=16  # ₹
+L 2.5,20 13.5,20
+L 2.5,14.5 13.5,14.5
+A 5.5,14.5 5,5.5 90 -90
+L 5.5,9 2.5,9
+L 3.5,9 12,0
+glyph U+20BA adv=16  # ₺
+L 5,20 5,0
+Q 5,0 14,0 14,9
+L 1.5,10.5 10,14.5
+L 1.5,5 10,9
+glyph U+20BD adv=18  # ₽
+use U+0050 1.5,0
+L 1,5 10,5
+glyph U+20BF adv=18  # ₿
+use U+0042 1,0
+L 5.5,20 5.5,23
+L 10.5,20 10.5,23
+L 5.5,0 5.5,-3
+L 10.5,0 10.5,-3
+
+# ---- Letterlike symbols ----
+
+glyph U+2116 adv=27  # №
+use U+004E
+A 22.5,15 2.75,3.5 0 360
+L 19.5,8.5 25.5,8.5
+glyph U+2122 adv=20  # ™
+L 1.5,20 7,20
+L 4.25,20 4.25,13
+L 11.5,13 11.5,20
+L 11.5,20 14.5,15
+L 14.5,15 17.5,20
+L 17.5,20 17.5,13
+
+# ---- Arrows ----
+
+glyph U+2190 adv=22  # ←
+L 2,9 20,9
+L 2,9 8,15
+L 2,9 8,3
+glyph U+2191 adv=18  # ↑
+L 9,0 9,19
+L 9,19 3,13
+L 9,19 15,13
+glyph U+2192 adv=22  # →
+L 2,9 20,9
+L 20,9 14,15
+L 20,9 14,3
+glyph U+2193 adv=18  # ↓
+L 9,19 9,0
+L 9,0 3,6
+L 9,0 15,6
+glyph U+2194 adv=24  # ↔
+L 2,9 22,9
+L 2,9 8,15
+L 2,9 8,3
+L 22,9 16,15
+L 22,9 16,3
+glyph U+2195 adv=18  # ↕
+L 9,-1 9,19
+L 9,19 3,13
+L 9,19 15,13
+L 9,-1 3,5
+L 9,-1 15,5
+glyph U+21E7 adv=18  # ⇧
+L 9,20 2,12.5
+L 2,12.5 5.5,12.5
+L 5.5,12.5 5.5,1
+L 5.5,1 12.5,1
+L 12.5,1 12.5,12.5
+L 12.5,12.5 16,12.5
+L 16,12.5 9,20
+
+# ---- Maths ----
+
+glyph U+2212 adv=16  # −
+L 2,9 14,9
+glyph U+221A adv=18  # √
+L 1.5,9 4.5,9
+L 4.5,9 8.5,0
+L 8.5,0 14,21
+L 14,21 17.5,21
+glyph U+221E adv=21  # ∞
+A 6.5,9 4,3.75 0 360
+A 14.5,9 4,3.75 0 360
+glyph U+2248 adv=16  # ≈
+Q 2,11.5 5,15.5 8,12.5
+Q 8,12.5 11,9.5 14,13.5
+Q 2,4.5 5,8.5 8,5.5
+Q 8,5.5 11,2.5 14,6.5
+glyph U+2260 adv=16  # ≠
+L 2,11.5 14,11.5
+L 2,6 14,6
+L 11,16 5,1.5
+glyph U+2264 adv=14  # ≤
+L 12,17 2,11.5
+L 2,11.5 12,6
+L 2,1 12,1
+glyph U+2265 adv=14  # ≥
+L 2,17 12,11.5
+L 12,11.5 2,6
+L 2,1 12,1
+
+# ---- Shapes the UI toolkit draws ----
+
+glyph U+23F4 adv=17  # ⏴
+F 13,4 13,14 4,9
+glyph U+23F5 adv=17  # ⏵
+F 4,4 4,14 13,9
+glyph U+23F6 adv=17  # ⏶
+F 3.5,4.5 13.5,4.5 8.5,13.5
+glyph U+23F7 adv=17  # ⏷
+F 3.5,13.5 13.5,13.5 8.5,4.5
+glyph U+25B2 adv=18  # ▲
+F 2,2 16,2 9,16
+glyph U+25BA adv=18  # ►
+F 3,2 3,16 16,9
+glyph U+25BC adv=18  # ▼
+F 2,16 16,16 9,2
+glyph U+25C4 adv=18  # ◄
+F 15,2 15,16 2,9
+glyph U+25CB adv=18  # ○
+A 9,9 6,6 0 360
+glyph U+25CF adv=18  # ●
+A 9,9 5,5 0 360
+A 9,9 2.5,2.5 0 360
+D 9,9
+glyph U+25FB adv=18  # ◻
+L 3,3 15,3
+L 15,3 15,15
+L 15,15 3,15
+L 3,15 3,3
+glyph U+2713 adv=18  # ✓
+L 2.5,9.5 7,3.5
+L 7,3.5 16,17
+glyph U+2717 adv=18  # ✗
+L 3.5,3 15,16
+L 14.5,3.5 3,15
