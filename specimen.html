@@ -8,7 +8,7 @@
   @font-face { font-family: "Remedy Sans"; src: url("fonts/RemedySans-Bold.woff2") format("woff2"); font-weight: 700; }
   body { margin: 0; padding: 28px 32px; width: 1136px; background: #040a09; color: #e2f3ee; font-family: "Remedy Sans", sans-serif; }
   h1 { margin: 0 0 4px; font-size: 64px; line-height: 1.15; font-weight: 700; }
-  p { margin: 0 0 20px; line-height: 1.35; }
+  p { margin: 0 0 20px; line-height: 1.35; overflow-wrap: anywhere; }
   .note { margin: 0 0 6px; color: #86a39c; font: 13px/1.4 system-ui, sans-serif; }
   .bold { font-weight: 700; }
 </style>
@@ -23,14 +23,23 @@
   <div class="note">Regular, 36px</div>
   <p style="font-size:36px">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789<br>!"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</p>
 
-  <div class="note">Bold and Regular, 24px and 16px</div>
-  <p class="bold" style="font-size:24px">The quick brown fox jumps over the lazy dog.</p>
-  <p class="bold" style="font-size:16px">Pack my box with five dozen liquor jugs. 0123456789</p>
-  <p style="font-size:24px">The quick brown fox jumps over the lazy dog.</p>
-  <p style="font-size:16px">Pack my box with five dozen liquor jugs. 0123456789</p>
-
-  <div class="note">Every character, 20px</div>
-  <p class="bold" style="font-size:20px">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 !"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</p>
-  <p style="font-size:20px">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 !"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</p>
+  <div class="note">Bold and Regular, 24px</div>
+  <p class="bold" style="font-size:24px">Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich.<br>Voix ambiguë d’un cœur qui, au zéphyr, préfère les jattes de kiwis.<br>Pchnąć w tę łódź jeża lub ośm skrzyń fig. Příliš žluťoučký kůň úpěl ďábelské ódy.<br>Árvíztűrő tükörfúrógép. Pijamalı hasta yağız şoföre çabucak güvendi.<br>Glāžšķūņa rūķīši dzērumā čiepj Baha koncertflīģeļu vākus. Eĥoŝanĝo ĉiuĵaŭde.<br>Ξεσκεπάζω την ψυχοφθόρα βδελυγμία.<br>Съешь же ещё этих мягких французских булок, да выпей чаю.<br>Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!</p>
+  <p style="font-size:24px">Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich.<br>Voix ambiguë d’un cœur qui, au zéphyr, préfère les jattes de kiwis.<br>Pchnąć w tę łódź jeża lub ośm skrzyń fig. Příliš žluťoučký kůň úpěl ďábelské ódy.<br>Árvíztűrő tükörfúrógép. Pijamalı hasta yağız şoföre çabucak güvendi.<br>Glāžšķūņa rūķīši dzērumā čiepj Baha koncertflīģeļu vākus. Eĥoŝanĝo ĉiuĵaŭde.<br>Ξεσκεπάζω την ψυχοφθόρα βδελυγμία.<br>Съешь же ещё этих мягких французских булок, да выпей чаю.<br>Чуєш їх, доцю, га? Кумедна ж ти, прощайся без ґольфів!</p>
+  <div class="note">Basic Latin, Bold and Regular, 22px</div>
+  <p class="bold" style="font-size:22px">!"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</p>
+  <p style="font-size:22px">!"#$%&amp;'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~</p>
+  <div class="note">Latin-1, Latin Extended-A, Romanian, and the accents on their own, Bold and Regular, 22px</div>
+  <p class="bold" style="font-size:22px">¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſƒȘșȚțˆˇ˘˙˚˛˜˝</p>
+  <p style="font-size:22px">¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſƒȘșȚțˆˇ˘˙˚˛˜˝</p>
+  <div class="note">Greek, Bold and Regular, 22px</div>
+  <p class="bold" style="font-size:22px">ΆΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώ</p>
+  <p style="font-size:22px">ΆΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώ</p>
+  <div class="note">Cyrillic, Bold and Regular, 22px</div>
+  <p class="bold" style="font-size:22px">ЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџҐґҒғҚқҢңҮүҰұҺһӘәӨө</p>
+  <p style="font-size:22px">ЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџҐґҒғҚқҢңҮүҰұҺһӘәӨө</p>
+  <div class="note">Punctuation, currency, letterlike, arrows, maths, and the shapes the UI toolkit draws, Bold and Regular, 22px</div>
+  <p class="bold" style="font-size:22px">‐‑‒–—―‘’‚“”„†‡•…‰′″‹›‼⁄₩₪₫€₱₴₸₹₺₽₿№™←↑→↓↔↕⇧−√∞≈≠≤≥⏴⏵⏶⏷▲►▼◄○●◻✓✗</p>
+  <p style="font-size:22px">‐‑‒–—―‘’‚“”„†‡•…‰′″‹›‼⁄₩₪₫€₱₴₸₹₺₽₿№™←↑→↓↔↕⇧−√∞≈≠≤≥⏴⏵⏶⏷▲►▼◄○●◻✓✗</p>
 </body>
 </html>
