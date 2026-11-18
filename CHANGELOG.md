@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.200 — 2026-11-18
+## 1.200 — 2026-11-18 (release v1.2.0)
 
 Five weights, the same set as Remedy Sans UI. The font's own version string is 1.200.
 

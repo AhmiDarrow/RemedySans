@@ -3,7 +3,7 @@
 Remedy Sans is the typeface of RemedyOS.
 A geometric sans in five weights (Light, Semilight, Regular, Semibold, Bold), drawn as strokes with round terminals.
 
-Version 1.200. The latest release is [v1.1.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) (font version 1.110).
+Version 1.200. The latest release is [v1.2.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.2.0) (font version 1.200).
 
 ![Remedy Sans specimen](specimen.png)
 
@@ -54,7 +54,7 @@ h1 { font: 700 64px/1.15 "Remedy Sans", sans-serif; }
 
 Install the five `.ttf` files (or the five `.otf` files; install one format, not both). On Windows, select the files, right-click, and choose Install. On macOS, open them in Font Book and choose Install. The family name is Remedy Sans. Bold is the bold style of that family; Light, Semilight and Semibold show up as Remedy Sans Light, Remedy Sans Semilight and Remedy Sans Semibold in apps that list families the old way, and inside the one Remedy Sans family in apps that read typographic names (CSS, design tools).
 
-The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) has the `.ttf` and `.otf` files, the web fonts, this readme, the changelog, and the specimen.
+The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.2.0) has the `.ttf` and `.otf` files, the web fonts, this readme, the changelog, and the specimen.
 
 ## Characters
 
