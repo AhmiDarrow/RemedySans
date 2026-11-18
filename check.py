@@ -19,7 +19,8 @@ import build
 
 ROOT = Path(__file__).resolve().parent
 FONTS = ROOT / "fonts"
-STYLES = ("Regular", "Bold")
+STYLES = tuple(st.name for st in build.STYLES)
+WEIGHT_CLASS = {st.name: st.weight_class for st in build.STYLES}
 
 
 def _span(a: int, b: int) -> list[int]:
@@ -237,10 +238,15 @@ def check_font(font, style: str, src: build.Source) -> None:
     }
     if {1, 2, 4, 5, 6} - set(name_ids):
         fail(f"{style} name table is missing an id")
-    if name_ids[1] != "Remedy Sans":
+    ribbi = style in ("Regular", "Bold")
+    want_family = build.FAMILY if ribbi else f"{build.FAMILY} {style}"
+    want_sub = style if ribbi else "Regular"
+    if name_ids[1] != want_family:
         fail(f"{style} family name is {name_ids[1]!r}")
-    if name_ids[2] != style:
+    if name_ids[2] != want_sub:
         fail(f"{style} style name is {name_ids[2]!r}")
+    if not ribbi and (name_ids.get(16) != build.FAMILY or name_ids.get(17) != style):
+        fail(f"{style} typographic family/subfamily is {name_ids.get(16)!r}/{name_ids.get(17)!r}")
     if name_ids[5] != f"Version {build.VERSION}":
         fail(f"{style} version string is {name_ids[5]!r}")
     if any(rec.platformID == 1 for rec in font["name"].names):
@@ -248,7 +254,7 @@ def check_font(font, style: str, src: build.Source) -> None:
 
     if os2.fsType != 0:
         fail(f"{style} fsType is {os2.fsType}, expected 0")
-    expect_weight = 700 if style == "Bold" else 400
+    expect_weight = WEIGHT_CLASS[style]
     if os2.usWeightClass != expect_weight:
         fail(f"{style} weight class {os2.usWeightClass}")
     if font["head"].unitsPerEm != build.UPM:
@@ -305,17 +311,17 @@ def main() -> int:
         check_font(loaded[style], style, src)
 
     regular = loaded["Regular"]
-    bold = loaded["Bold"]
-    for table, attr in (("hhea", "ascent"), ("hhea", "descent"), ("hhea", "lineGap")):
-        if getattr(regular[table], attr) != getattr(bold[table], attr):
-            fail(f"family {table}.{attr} differs")
-    for attr in ("sTypoAscender", "sTypoDescender", "sTypoLineGap", "usWinAscent", "usWinDescent"):
-        if getattr(regular["OS/2"], attr) != getattr(bold["OS/2"], attr):
-            fail(f"family OS/2.{attr} differs")
-    if regular["post"].underlineThickness != bold["post"].underlineThickness:
-        fail("underline thickness differs between weights")
-    if regular.getGlyphOrder() != bold.getGlyphOrder():
-        fail("the weights have different glyph sets")
+    for other_style, other in loaded.items():
+        for table, attr in (("hhea", "ascent"), ("hhea", "descent"), ("hhea", "lineGap")):
+            if getattr(regular[table], attr) != getattr(other[table], attr):
+                fail(f"family {table}.{attr} differs in {other_style}")
+        for attr in ("sTypoAscender", "sTypoDescender", "sTypoLineGap", "usWinAscent", "usWinDescent"):
+            if getattr(regular["OS/2"], attr) != getattr(other["OS/2"], attr):
+                fail(f"family OS/2.{attr} differs in {other_style}")
+        if regular["post"].underlineThickness != other["post"].underlineThickness:
+            fail(f"underline thickness differs in {other_style}")
+        if regular.getGlyphOrder() != other.getGlyphOrder():
+            fail(f"{other_style} has a different glyph set from Regular")
 
     # Digits share one advance, taken from the stroke file.
     digit_width = build.fu(16)
@@ -329,7 +335,7 @@ def main() -> int:
 
     print(
         f"ok: {len(src.glyphs)} characters from the stroke source plus U+00A0 on the space glyph, "
-        f"all {len(TARGET)} target characters, Regular and Bold; "
+        f"all {len(TARGET)} target characters, Light, Semilight, Regular, Semibold and Bold; "
         f"{clear} accent placements clear of their letters"
     )
     return 0

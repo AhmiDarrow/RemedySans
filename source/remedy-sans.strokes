@@ -22,7 +22,7 @@
 #   letter is the same in Regular and Bold. 'attach' marks are drawn touching the anchor.
 #
 # Anchors and marks sit on stroke centrelines, like every other coordinate here.
-# Stroke weight comes from the renderer (regular 3.0, bold 4.3); every terminal is round.
+# Stroke weight comes from the renderer (light 2.1, semilight 2.55, regular 3.0, semibold 3.6, bold 4.3); every terminal is round.
 
 # ---- Basic Latin ----
 
@@ -1664,8 +1664,7 @@ glyph U+25CB adv=18  # ○
 A 9,9 6,6 0 360
 glyph U+25CF adv=18  # ●
 A 9,9 5,5 0 360
-A 9,9 2.5,2.5 0 360
-D 9,9
+F 14.00,9.00 13.92,9.87 13.70,10.71 13.33,11.50 12.83,12.21 12.21,12.83 11.50,13.33 10.71,13.70 9.87,13.92 9.00,14.00 8.13,13.92 7.29,13.70 6.50,13.33 5.79,12.83 5.17,12.21 4.67,11.50 4.30,10.71 4.08,9.87 4.00,9.00 4.08,8.13 4.30,7.29 4.67,6.50 5.17,5.79 5.79,5.17 6.50,4.67 7.29,4.30 8.13,4.08 9.00,4.00 9.87,4.08 10.71,4.30 11.50,4.67 12.21,5.17 12.83,5.79 13.33,6.50 13.70,7.29 13.92,8.13
 glyph U+25FB adv=18  # ◻
 L 3,3 15,3
 L 15,3 15,15
