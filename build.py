@@ -8,7 +8,8 @@ Build Remedy Sans from source/remedy-sans.strokes.
 
 The strokes file is the only source for the characters. Each stroke is expanded
 to a filled outline with round caps and round joins, then overlaps are removed
-so the glyph is one clean outline. Regular is weight 3.0 and Bold is weight 4.3
+so the glyph is one clean outline. Five weights are built from the one drawing by stroke weight: Light
+2.1, Semilight 2.55, Regular 3.0, Semibold 3.6 and Bold 4.3
 on the 24-unit grid. That grid is the em square (unitsPerEm 1000).
 """
 from __future__ import annotations
@@ -39,7 +40,7 @@ OUT = ROOT / "fonts"
 
 FAMILY = "Remedy Sans"
 FILE_STEM = "RemedySans"
-VERSION = "1.110"
+VERSION = "1.200"
 COPYRIGHT = "Copyright 2026 Ahmi Darrow"
 DESIGNER = "Ahmi Darrow"
 VENDOR_URL = "https://github.com/AhmiDarrow/RemedySans"
@@ -60,7 +61,27 @@ DESCENDER = -6.0
 CAP_HEIGHT = 20.0
 X_HEIGHT = 14.0
 
-WEIGHTS = {"regular": 3.0, "bold": 4.3}
+class Style:
+    """One weight of the family."""
+
+    def __init__(self, name: str, stroke: float, weight_class: int, panose: int):
+        self.name = name                # style name: Light, Semilight, Regular, Semibold, Bold
+        self.stroke = stroke            # stroke weight in grid units
+        self.weight_class = weight_class
+        self.panose = panose
+        self.ribbi = name in ("Regular", "Bold")
+
+
+# The same steps between weights as Remedy Sans UI, scaled to this font's
+# own Regular-to-Bold distance.
+STYLES = [
+    Style("Light", 2.1, 300, 3),
+    Style("Semilight", 2.55, 350, 4),
+    Style("Regular", 3.0, 400, 5),
+    Style("Semibold", 3.6, 600, 7),
+    Style("Bold", 4.3, 700, 8),
+]
+WEIGHTS = {s.name.lower(): s.stroke for s in STYLES}
 
 # Generated .notdef box, not part of the strokes file. A rounded frame.
 NOTDEF_ADV = 16.0
@@ -645,11 +666,11 @@ def glyph_name(cp: int) -> str:
     return UV2AGL.get(cp, f"uni{cp:04X}")
 
 
-def build_weight(weight_name: str, src: Source) -> tuple[object, int, int]:
+def build_weight(st: Style, src: Source) -> tuple[object, int, int]:
     """Return (TTFont, yMin, yMax) for one weight. Vertical metrics are filled later."""
-    weight = WEIGHTS[weight_name]
-    is_bold = weight_name == "bold"
-    style = "Bold" if is_bold else "Regular"
+    weight = st.stroke
+    is_bold = st.name == "Bold"
+    style = st.name
     ps = f"RemedySans-{style}"
 
     order = [".notdef"]
@@ -688,14 +709,22 @@ def build_weight(weight_name: str, src: Source) -> tuple[object, int, int]:
     fb.setupCharacterMap(cmap)
     fb.setupGlyf(glyf)
     fb.setupHorizontalMetrics(metrics)
-    # Placeholders; main() sets the family line box once both weights exist.
+    # Placeholders; main() sets the family line box once every weight exists.
     fb.setupHorizontalHeader(ascent=fu(ASCENDER), descent=fu(DESCENDER), lineGap=0)
-    full = FAMILY if not is_bold else f"{FAMILY} {style}"
+    # Regular and Bold are one style-linked family. The other weights are
+    # families of their own for old apps, and all five share the typographic
+    # family name.
+    if st.ribbi:
+        family, subfamily = FAMILY, style
+        full = FAMILY if style == "Regular" else f"{FAMILY} {style}"
+    else:
+        family, subfamily = f"{FAMILY} {style}", "Regular"
+        full = f"{FAMILY} {style}"
     fb.setupNameTable(
         {
             "copyright": COPYRIGHT,
-            "familyName": FAMILY,
-            "styleName": style,
+            "familyName": family,
+            "styleName": subfamily,
             "uniqueFontIdentifier": f"{FAMILY} {style} {VERSION}",
             "fullName": full,
             "version": f"Version {VERSION}",
@@ -710,10 +739,13 @@ def build_weight(weight_name: str, src: Source) -> tuple[object, int, int]:
             "sampleText": "Remedy Sans is the typeface of RemedyOS.",
         }
     )
+    if not st.ribbi:
+        fb.font["name"].setName(FAMILY, 16, 3, 1, 0x409)
+        fb.font["name"].setName(style, 17, 3, 1, 0x409)
     panose = Panose()
     panose.bFamilyType = 2          # Latin text
     panose.bSerifStyle = 11         # normal sans
-    panose.bWeight = 8 if is_bold else 5  # bold / book, matching the weight class
+    panose.bWeight = st.panose      # matches the weight class
     panose.bProportion = 3          # modern
     panose.bContrast = 2            # none: the stroke is one width
     panose.bStrokeVariation = 1     # no fit
@@ -723,7 +755,7 @@ def build_weight(weight_name: str, src: Source) -> tuple[object, int, int]:
     panose.bXHeight = 4             # constant, large
     fb.setupOS2(
         version=4,
-        usWeightClass=700 if is_bold else 400,
+        usWeightClass=st.weight_class,
         usWidthClass=5,
         fsType=0,
         sFamilyClass=(8 << 8) | 5,  # sans, geometric
@@ -780,7 +812,7 @@ LINE_DESCENT = -340
 
 
 def apply_family_metrics(fonts: dict[str, object], bounds: dict[str, tuple[int, int]]) -> None:
-    """One line box for both weights: hhea and typo give the line spacing,
+    """One line box for every weight: hhea and typo give the line spacing,
     usWin covers every glyph so Windows never clips one."""
     y_min = min(b[0] for b in bounds.values())
     y_max = max(b[1] for b in bounds.values())
@@ -887,7 +919,7 @@ def save_font(font, style: str) -> Path:
     """Write the hinted .ttf and .woff2, and the hinted .otf."""
     OUT.mkdir(exist_ok=True)
     stem = OUT / f"{FILE_STEM}-{style}"
-    weight = WEIGHTS["bold" if style == "Bold" else "regular"]
+    weight = WEIGHTS[style.lower()]
 
     otf = stem.with_suffix(".otf")
     _otf_from(font, weight).save(otf)
@@ -909,17 +941,16 @@ def main() -> int:
     src = load()
     fonts = {}
     bounds = {}
-    for weight_name in ("regular", "bold"):
-        font, y_min, y_max = build_weight(weight_name, src)
-        fonts[weight_name] = font
-        bounds[weight_name] = (y_min, y_max)
+    for st in STYLES:
+        font, y_min, y_max = build_weight(st, src)
+        fonts[st.name] = font
+        bounds[st.name] = (y_min, y_max)
     apply_family_metrics(fonts, bounds)
-    for weight_name, font in fonts.items():
-        style = "Bold" if weight_name == "bold" else "Regular"
-        path = save_font(font, style)
+    for st in STYLES:
+        path = save_font(fonts[st.name], st.name)
         print(
             f"built {path.relative_to(ROOT)}, .woff2 and .otf "
-            f"({len(src.glyphs)} characters, weight {WEIGHTS[weight_name]})"
+            f"({len(src.glyphs)} characters, weight {st.stroke})"
         )
     return 0
 

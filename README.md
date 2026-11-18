@@ -1,9 +1,9 @@
 # Remedy Sans
 
 Remedy Sans is the typeface of RemedyOS.
-A geometric sans in Regular and Bold, drawn as strokes with round terminals.
+A geometric sans in five weights (Light, Semilight, Regular, Semibold, Bold), drawn as strokes with round terminals.
 
-Version 1.110. The latest release is [v1.1.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) (font version 1.110).
+Version 1.200. The latest release is [v1.1.0](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) (font version 1.110).
 
 ![Remedy Sans specimen](specimen.png)
 
@@ -11,10 +11,10 @@ Version 1.110. The latest release is [v1.1.0](https://github.com/AhmiDarrow/Reme
 
 | Path | What it is |
 |---|---|
-| `fonts/` | Ready-to-use files: `RemedySans-Regular` and `RemedySans-Bold`, each as `.ttf`, `.otf` and `.woff2`. The `.ttf` and `.woff2` are hinted with ttfautohint (stems snap to whole pixels); the `.otf` carries PostScript hints from otfautohint |
+| `fonts/` | Ready-to-use files: `RemedySans-Light`, `-Semilight`, `-Regular`, `-Semibold` and `-Bold`, each as `.ttf`, `.otf` and `.woff2`. The `.ttf` and `.woff2` are hinted with ttfautohint (stems snap to whole pixels); the `.otf` carries PostScript hints from otfautohint |
 | `source/remedy-sans.strokes` | The source. Every character drawn as strokes on a 24-unit grid |
 | `build.py` | Turns the stroke file into the font files |
-| `check.py` | Checks advances, holes, and that both weights share one set of metrics |
+| `check.py` | Checks advances, holes, and that all five weights share one set of metrics and glyphs |
 | `specimen.html` | Open in a browser to see every character |
 | `LICENSE` | SIL Open Font License 1.1 |
 | `CHANGELOG.md` | Release history |
@@ -24,8 +24,23 @@ Version 1.110. The latest release is [v1.1.0](https://github.com/AhmiDarrow/Reme
 ```css
 @font-face {
   font-family: "Remedy Sans";
+  src: url("fonts/RemedySans-Light.woff2") format("woff2");
+  font-weight: 300;
+}
+@font-face {
+  font-family: "Remedy Sans";
+  src: url("fonts/RemedySans-Semilight.woff2") format("woff2");
+  font-weight: 350;
+}
+@font-face {
+  font-family: "Remedy Sans";
   src: url("fonts/RemedySans-Regular.woff2") format("woff2");
   font-weight: 400;
+}
+@font-face {
+  font-family: "Remedy Sans";
+  src: url("fonts/RemedySans-Semibold.woff2") format("woff2");
+  font-weight: 600;
 }
 @font-face {
   font-family: "Remedy Sans";
@@ -37,13 +52,13 @@ h1 { font: 700 64px/1.15 "Remedy Sans", sans-serif; }
 
 ## Using it on the desktop
 
-Install `RemedySans-Regular.ttf` and `RemedySans-Bold.ttf` (or the two `.otf` files; install one format, not both). On Windows, select both files, right-click, and choose Install. On macOS, open them in Font Book and choose Install. The family name is Remedy Sans. Bold is the bold style of that family.
+Install the five `.ttf` files (or the five `.otf` files; install one format, not both). On Windows, select the files, right-click, and choose Install. On macOS, open them in Font Book and choose Install. The family name is Remedy Sans. Bold is the bold style of that family; Light, Semilight and Semibold show up as Remedy Sans Light, Remedy Sans Semilight and Remedy Sans Semibold in apps that list families the old way, and inside the one Remedy Sans family in apps that read typographic names (CSS, design tools).
 
 The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v1.1.0) has the `.ttf` and `.otf` files, the web fonts, this readme, the changelog, and the specimen.
 
 ## Characters
 
-584 characters in each weight, the same set in Regular and Bold:
+584 characters in each weight, the same set in all five weights:
 
 - Basic Latin, Latin-1 Supplement and Latin Extended-A in full (Western, Central European, Baltic, Turkish, Maltese, Welsh, Esperanto), plus Romanian Ș ș Ț ț, ƒ, and dotless ȷ
 - The accents on their own: ˆ ˇ ˘ ˙ ˚ ˛ ˜ ˝ ´ ¨ ¯ ¸
@@ -56,9 +71,9 @@ The zip on the [release](https://github.com/AhmiDarrow/RemedySans/releases/tag/v
 
 U+00A0 no-break space uses the same empty glyph as the space, so a line will not break there. No emoji, and no scripts that need shaping (Arabic, Hebrew, Indic) or very large sets (CJK).
 
-The drawing grid is 24 units tall: baseline 0, x-height 14, cap height 20, ascender 21, descender -6. Regular is stroke weight 3.0 and Bold is 4.3, both with round caps and round joins. The font is proportional (digits share one width) at 1000 units per em. Line spacing is the same as in 1.000 and shared by both weights: ascent 1048, descent -340, no line gap, in both the hhea and the typo metrics, with USE_TYPO_METRICS set. Accents on capitals may rise above that ascent, as in most fonts. The Windows metrics (usWinAscent 1312, usWinDescent 416) cover every glyph, so nothing is clipped.
+The drawing grid is 24 units tall: baseline 0, x-height 14, cap height 20, ascender 21, descender -6. The weights are stroke weights 2.1 (Light), 2.55 (Semilight), 3.0 (Regular), 3.6 (Semibold) and 4.3 (Bold), all with round caps and round joins. The font is proportional (digits share one width) at 1000 units per em. Line spacing is the same as in 1.000 and shared by every weight: ascent 1048, descent -340, no line gap, in both the hhea and the typo metrics, with USE_TYPO_METRICS set. Accents on capitals may rise above that ascent, as in most fonts. The Windows metrics (usWinAscent 1312, usWinDescent 416) cover every glyph, so nothing is clipped.
 
-Accented letters are not drawn one by one. Each accent is drawn once in the stroke file as a `mark`, each base letter says where marks sit with `anchor` lines, and a line such as `glyph U+00C1 = U+0041 + acute` builds Á. The build lifts a mark clear of the letter by one stroke weight plus a fixed gap, so the space between accent and letter looks the same in Regular and Bold. Greek and Cyrillic letters that look like Latin ones reuse the Latin drawing (`glyph U+0410 = U+0041`).
+Accented letters are not drawn one by one. Each accent is drawn once in the stroke file as a `mark`, each base letter says where marks sit with `anchor` lines, and a line such as `glyph U+00C1 = U+0041 + acute` builds Á. The build lifts a mark clear of the letter by one stroke weight plus a fixed gap, so the space between accent and letter looks the same in every weight. Greek and Cyrillic letters that look like Latin ones reuse the Latin drawing (`glyph U+0410 = U+0041`).
 
 ## Changing a letter
 
@@ -71,9 +86,9 @@ python build.py
 python check.py
 ```
 
-`build.py` expands every stroke to a filled outline, removes the overlaps, hints them, and writes the `.ttf`, `.woff2` and `.otf` files. Advance widths come from the stroke file and are the same in both weights. Changing a base letter or a mark changes every accented letter built from it.
+`build.py` expands every stroke to a filled outline, removes the overlaps, hints them, and writes the `.ttf`, `.woff2` and `.otf` files. Advance widths come from the stroke file and are the same in every weight. Changing a base letter or a mark changes every accented letter built from it.
 
-`check.py` also checks that every character on the list above is present in both weights, that every character except the spaces has an outline, that no accent touches its letter, that the line spacing still equals 1.000's, and that the Windows metrics cover every glyph.
+`check.py` also checks that every character on the list above is present in every weight, that every character except the spaces has an outline, that no accent touches its letter, that the line spacing still equals 1.000's, and that the Windows metrics cover every glyph.
 
 ## About
 
