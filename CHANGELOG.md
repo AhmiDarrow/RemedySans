@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.201 — 2026-11-19
+
+Curved letters sit on the same baseline and x-height as the rest. The font's own version string is 1.201. Advances, metrics and coverage are unchanged.
+
+- Arcs are now cut at their leftmost, rightmost, top and bottom points before the stroke is expanded. An arc that started elsewhere (e, s, C, G, S and the letters built from them) had no outline point at its lowest or highest spot and its outline's control points reached 3 to 7 units past the other letters, so at small sizes the hinter left those letters a pixel above or below their neighbours
+- The lower bowl of 3 (and of З, built from it) reaches the baseline. It stopped 8 units short, so 3 could sit a pixel above the other digits
+
 ## 1.200 — 2026-11-18 (release v1.2.0)
 
 Five weights, the same set as Remedy Sans UI. The font's own version string is 1.200.

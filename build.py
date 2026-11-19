@@ -40,7 +40,7 @@ OUT = ROOT / "fonts"
 
 FAMILY = "Remedy Sans"
 FILE_STEM = "RemedySans"
-VERSION = "1.200"
+VERSION = "1.201"
 COPYRIGHT = "Copyright 2026 Ahmi Darrow"
 DESIGNER = "Ahmi Darrow"
 VENDOR_URL = "https://github.com/AhmiDarrow/RemedySans"
@@ -397,12 +397,15 @@ def _add_arc(path, cx, cy, rx, ry, a0, a1) -> None:
     if abs(sweep) < 1e-9 or rx <= 0 or ry <= 0:
         return
     closed = abs(abs(sweep) - 360.0) <= 1e-4
-    pieces = max(1, math.ceil(abs(sweep) / 90.0 - 1e-9))
-    cubics = []
-    for i in range(pieces):
-        t0 = a0 + sweep * i / pieces
-        t1 = a0 + sweep * (i + 1) / pieces
-        cubics.append(_arc_cubic(cx, cy, rx, ry, t0, t1))
+    # Cut the arc at every multiple of 90 degrees inside it, so the ellipse's
+    # leftmost, rightmost, top and bottom points are on-curve points. A piece
+    # spanning one of them lets the stroke outline bulge a few units past it,
+    # and an e or s then reaches below the baseline the other letters sit on.
+    lo, hi = min(a0, a1), max(a0, a1)
+    cuts = [90.0 * k for k in range(math.floor(lo / 90.0) + 1, math.ceil(hi / 90.0))]
+    cuts = [c for c in cuts if lo + 1e-9 < c < hi - 1e-9]
+    angles = [a0] + (cuts if sweep > 0 else cuts[::-1]) + [a1]
+    cubics = [_arc_cubic(cx, cy, rx, ry, t0, t1) for t0, t1 in zip(angles, angles[1:])]
     sx, sy = cubics[0][0]
     path.moveTo(sx * SCALE, sy * SCALE)
     last = len(cubics) - 1
